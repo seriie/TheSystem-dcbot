@@ -1,0 +1,21 @@
+{
+  "name": "asia-rangking-bot",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "Zee",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.76.1",
+    "discord.js": "^14.23.2",
+    "dotenv": "^17.2.3",
+    "fs": "^0.0.1-security",
+    "nanoid": "^5.1.6",
+    "path": "^0.12.7"
+  }
+}

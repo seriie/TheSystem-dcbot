@@ -1,0 +1,61 @@
+import { EmbedBuilder } from "discord.js";
+
+export const rankingConceptEmbed = async (client) => {
+  const channelId = "1430788637464985651";
+  const channel = await client.channels.fetch(channelId);
+
+  if (!channel) {
+    console.error("❌ Ranking concept channel not found!");
+    return;
+  }
+
+  try {
+    console.log("🧹 Purging ALL messages in register channel...");
+    let deleted;
+    do {
+      const fetched = await channel.messages.fetch({ limit: 100 });
+      if (fetched.size === 0) break;
+      deleted = await channel.bulkDelete(fetched, true);
+      console.log(`🗑️ Deleted ${deleted.size} messages...`);
+      await new Promise((r) => setTimeout(r, 1500));
+    } while (deleted.size > 0);
+  } catch (err) {
+    console.error("⚠️ Failed to delete messages:", err);
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor("#000000")
+    .setTitle("🧠 Ranking Concept")
+    .setDescription(
+      `
+        Asia Ranking, Ranking concept
+⁠⬩<#1430790441036414986>
+You will be observe by any of our staff if any of them in the scrim that's happening and will impact your ranking depending on your performance or you can send an ss of the scrim stat to one of our staff and we might consider it (friendly didnt count)
+
+⁠⬩<#1430790486649475193>
+We will create a voting system for the top style ranking and to enter you have to play 1 style and vote and everyone can participate then we will process all the votes and then post the voting results
+
+⁠⬩<#1430790535215317022>
+We will review every scrim record of every server in asia that we know and will procces it and rank the club one by one from the scrim record
+
+⁠⬩<#1430793940117880893>
+We will gather all asia player game stat and will procces it and rank it from highest to the lowest up to 5 ppl only
+
+  We are ready to clear any queries you have!
+        `
+    )
+    .setImage("attachment://rankingConcept-bg.png")
+    .setTimestamp();
+
+  await channel.send({
+    content: "**Welcome to the Ranking Concept Channel!** 🌟",
+    embeds: [embed],
+    files: [
+      {
+        attachment: "./src/assets/rankingConcept-bg.png",
+        name: "rankingConcept-bg.png",
+      },
+    ],
+  });
+  console.log("✅ Ranking concept message sent successfully!");
+};

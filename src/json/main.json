@@ -1,0 +1,24 @@
+{
+  "commands": {
+    "ping": {
+      "description": "Check bot latency",
+      "category": "utility"
+    },
+    "users": {
+        "description": "Get total registered users",
+        "category": "utility"
+    },
+    "verify": {
+      "description": "Verify your account",
+      "category": "auth"
+    },
+    "rank": {
+      "description": "Ranking players",
+      "category": "ranking"
+    },
+    "showranking": {
+        "description": "Show ranking leaderboard",
+        "category": "ranking"
+    }
+  }
+}
