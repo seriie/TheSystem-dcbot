@@ -1,3 +1,4 @@
+import express from "express";
 import { Client, GatewayIntentBits, EmbedBuilder, Partials } from "discord.js";
 import { showRankEmbed } from "./commands/showRank.js";
 import { showUsers } from "./commands/showUsers.js";
@@ -8,9 +9,16 @@ import {
 } from "./commands/register.js";
 import { rankingConceptEmbed } from "./commands/rankingConcept.js";
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+
 import dotenv from "dotenv";
 
 dotenv.config();
+
+app.get("/", (req, res) => {
+  res.send("Bot API is running! 💫");
+});
 
 const client = new Client({
   intents: [
@@ -97,3 +105,5 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
+
+export default app;
