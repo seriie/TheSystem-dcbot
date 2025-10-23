@@ -10,9 +10,12 @@ import {
 import { nanoIdFormat } from "../utils/nanoid.js";
 import { supabase } from "../config/supabase.js";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 // === SEND REGISTER MESSAGE ===
 export const sendRegisterMessage = async (client) => {
-  const channelId = "1430925911104159754";
+  const channelId = proccess.env.REGISTER_CHANNEL_ID;
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {

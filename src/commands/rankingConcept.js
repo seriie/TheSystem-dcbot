@@ -1,7 +1,9 @@
 import { EmbedBuilder } from "discord.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const rankingConceptEmbed = async (client) => {
-  const channelId = "1430788637464985651";
+  const channelId = process.env.RANKING_CONCEPT_CHANNEL_ID;
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
