@@ -41,7 +41,7 @@ We will create a voting system for the top style ranking and to enter you have t
 We will review every scrim record of every server in asia that we know and will procces it and rank the club one by one from the scrim record
 
 ⁠⬩<#1430793940117880893>
-We will gather all asia player game stat and will procces it and rank it from highest to the lowest up to 5 ppl only
+We will make a rating system from Shooting, Passing, Blocking, Playmaking, and Style mastery. you will be rating for all other people and we will procces it and post the results
 
   We are ready to clear any queries you have!
         `

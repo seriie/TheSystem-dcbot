@@ -37,8 +37,12 @@ client.once("clientReady", async () => {
 });
 
 client.on("messageCreate", async (msg) => {
+  
   if (msg.content.startsWith("$")) {
     const command = msg.content.slice(1).split(" ")[0];
+    if(msg.client.user.id == "1392481215205871618") {
+      msg.reply("BACOT MIZU NOOB!!!");
+    }
 
     try {
       switch (command) {
