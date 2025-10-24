@@ -15,7 +15,7 @@ dotenv.config();
 
 // === SEND REGISTER MESSAGE ===
 export const sendRegisterMessage = async (client) => {
-  const channelId = proccess.env.REGISTER_CHANNEL_ID;
+  const channelId = process.env.REGISTER_CHANNEL_ID;
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
