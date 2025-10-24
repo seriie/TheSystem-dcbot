@@ -6,8 +6,16 @@ import {
   sendRegisterMessage,
   handleRegisterButton,
   handleRegisterModal,
-} from "./commands/register.js";
-import { rankingConceptEmbed } from "./commands/rankingConcept.js";
+} from "./messages/register.js";
+import { rankingConceptEmbed } from "./messages/rankingConcept.js";
+
+//  Rankings
+import { addRankEmbed } from "./messages/addRank.js";
+import {
+  handleRankButton,
+  handleSelectPlayer,
+  handleModalSubmit,
+} from "./commands/addrank.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,11 +40,12 @@ const client = new Client({
 client.once("clientReady", async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
+  await addRankEmbed(client);
   await sendRegisterMessage(client);
   await rankingConceptEmbed(client);
 });
 
-client.on("messageCreate", async (msg) => { 
+client.on("messageCreate", async (msg) => {
   if (msg.content.startsWith("$")) {
     const command = msg.content.slice(1).split(" ")[0];
 
@@ -100,6 +109,12 @@ client.on("messageCreate", async (msg) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
+  // Rankins
+  await handleRankButton(interaction);
+  await handleSelectPlayer(interaction);
+  await handleModalSubmit(interaction);
+
+  // Register
   await handleRegisterButton(interaction);
   await handleRegisterModal(interaction);
 });
