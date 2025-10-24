@@ -70,11 +70,9 @@ client.on("messageCreate", async (msg) => {
           const channel = msg.channel;
 
           try {
-            // Fetch semua pesan
             const fetched = await channel.messages.fetch({ limit: 100 });
             await channel.bulkDelete(fetched);
 
-            // Loop buat hapus sisa pesan (karena bulkDelete maksimal 100 per kali)
             let deleted;
             do {
               deleted = await channel.bulkDelete(100, true);
@@ -82,7 +80,6 @@ client.on("messageCreate", async (msg) => {
 
             const confirmMsg = await channel.send(`✅ All message deleted!`);
 
-            // Hapus pesan konfirmasi setelah 3 detik
             setTimeout(() => {
               confirmMsg.delete().catch(() => {});
             }, 3000);
