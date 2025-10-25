@@ -7,9 +7,13 @@ import {
   handleRegisterButton,
   handleRegisterModal,
 } from "./messages/register.js";
+
+//  Ranking concept
 import { rankingConceptEmbed } from "./messages/rankingConcept.js";
 
 //  Rankings
+import { addRankEmbed } from "./messages/addRank.js";
+
 import {
   handleRankButton,
   handleSelectPlayer,
@@ -39,6 +43,7 @@ const client = new Client({
 client.once("clientReady", async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
+  await addRankEmbed(client);
   await sendRegisterMessage(client);
   await rankingConceptEmbed(client);
 });

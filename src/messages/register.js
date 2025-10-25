@@ -73,6 +73,7 @@ export const sendRegisterMessage = async (client) => {
 export const handleRegisterButton = async (interaction) => {
   if (!interaction.isButton() || interaction.customId !== "register_user")
     return;
+  console.log(`📝 ${interaction.user.username} is trying to register...`);
 
   const userId = interaction.user.id;
   const username = interaction.user.username;
@@ -140,6 +141,7 @@ export const handleRegisterModal = async (interaction) => {
     });
   }
 
+  console.log(`✅ ${interaction.user.username} have been registered!`)
   await interaction.reply({
     content: `✅ Successfully registered, **${username}**!\nYour Roblox username: **${robloxUsername}** 🎮`,
     ephemeral: true,

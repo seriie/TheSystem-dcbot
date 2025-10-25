@@ -45,12 +45,29 @@ export const handleSelectPlayer = async (interaction) => {
   if (interaction.customId !== "select_player_to_rank") return;
 
   const player = interaction.values[0];
+  const user = interaction.user;
+
+  if (player === user.username) {
+    console.log(`⚠️ ${user.username} is trying to rank himself`);
+    return interaction.reply({
+      content: "🚫 You can’t rank yourself, silly!",
+      ephemeral: true,
+    });
+  }
+
+  console.log(`${user.username} selected ${player}!`)
 
   const modal = new ModalBuilder()
     .setCustomId(`rank_modal_${player}`)
     .setTitle(`🏀 Rank ${player}`);
 
-  const skills = ["offense", "defense", "playmaking", "style_mastery", "vision"];
+  const skills = [
+    "offense",
+    "defense",
+    "playmaking",
+    "style_mastery",
+    "vision",
+  ];
   const inputs = skills.map((skill) =>
     new TextInputBuilder()
       .setCustomId(skill)
@@ -60,7 +77,9 @@ export const handleSelectPlayer = async (interaction) => {
       .setRequired(true)
   );
 
-  modal.addComponents(inputs.map((i) => new ActionRowBuilder().addComponents(i)));
+  modal.addComponents(
+    inputs.map((i) => new ActionRowBuilder().addComponents(i))
+  );
 
   await interaction.showModal(modal);
 };
@@ -70,13 +89,24 @@ export const handleModalSubmit = async (interaction) => {
   if (!interaction.customId.startsWith("rank_modal_")) return;
 
   const player = interaction.customId.replace("rank_modal_", "");
-  const skills = ["offense", "defense", "playmaking", "style_mastery", "vision"];
+  const skills = [
+    "offense",
+    "defense",
+    "playmaking",
+    "style_mastery",
+    "vision",
+  ];
 
   const data = {};
   for (const s of skills) {
     data[s] = parseFloat(interaction.fields.getTextInputValue(s));
   }
 
+  // 🧮 Calculate the average score
+  const total = Object.values(data).reduce((acc, val) => acc + val, 0);
+  const rank = total / skills.length;
+
+  // find user_id based on username
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("id")
@@ -93,14 +123,27 @@ export const handleModalSubmit = async (interaction) => {
 
   const user_id = userData.id;
 
+  // Save to rankings
   const { error } = await supabase.from("rankings").insert([
     {
       user_id,
       discord_username: player,
       ...data,
+      rank, // ⬅️ average from the score
       created_at: new Date().toISOString(),
     },
   ]);
+
+  // Update for user ranked marking
+  try {
+    console.log("updating rank status...");
+    await supabase
+      .from("users")
+      .update({ rank_verified: true })
+      .eq("id", user_id);
+  } catch (e) {
+    console.error("Error updating user:", e);
+  }
 
   if (error) {
     console.error(error);
@@ -110,8 +153,12 @@ export const handleModalSubmit = async (interaction) => {
     });
   }
 
+  console.log(`📊 ${interaction.user.username} have ranked ${player}`)
+
   await interaction.reply({
-    content: `✅ Ranking for **${player}** saved successfully!`,
+    content: `✅ Ranking for **${player}** saved successfully! Average rank: **${rank.toFixed(
+      2
+    )}** 🏀`,
     ephemeral: true,
   });
 };

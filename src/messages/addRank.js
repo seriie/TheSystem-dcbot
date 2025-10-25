@@ -3,14 +3,9 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
   StringSelectMenuBuilder,
 } from "discord.js";
 import { getUnrankedUsers } from "../db/getUnrankedUsers.js";
-
-import { supabase } from "../config/supabase.js";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -45,6 +40,7 @@ export const addRankEmbed = async (client) => {
       "Click the button below to add a new rank to the ranking system.\n\n" +
         "Make sure to provide accurate information when prompted!"
     )
+    .setImage("attachment://set-rank-bg.png")
     .setFooter({ text: "Press the button!" })
     .setTimestamp();
 
@@ -59,19 +55,18 @@ export const addRankEmbed = async (client) => {
     content: "**Add a New Rank For Players to the Ranking System!** 🏆",
     embeds: [embed],
     components: [row],
-    // files: [attachment],
+    files: [
+     {
+      attachment: './src/assets/set-rank-bg.png',
+      name: 'set-rank-bg.png'
+     }
+    ],
   });
   console.log("✅ Add Rank message sent!");
 };
 
 export const handleRankButton = async (interaction) => {
   if (!interaction.isButton()) return;
-
-  const { data } = await supabase.from("users").select("discord_username");
-
-  const modal = new ModalBuilder()
-    .setCustomId("register_modal")
-    .setTitle("🏆 Ranking players");
 
   const users = await getUnrankedUsers(25);
   if (!users.length) {
