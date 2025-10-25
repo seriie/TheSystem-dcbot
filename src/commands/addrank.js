@@ -153,7 +153,7 @@ export const handleModalSubmit = async (interaction) => {
     });
   }
 
-  console.log(`\n📊   ${interaction.user.username} have ranked ${player}`)
+  console.log(`\n📊  ${interaction.user.username} have ranked ${player}`)
 
   await interaction.reply({
     content: `✅ Ranking for **${player}** saved successfully! Average rank: **${rank.toFixed(
