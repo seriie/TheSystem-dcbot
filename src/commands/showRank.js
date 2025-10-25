@@ -15,7 +15,7 @@ export async function showRankEmbed(limit = 20) {
     .limit(limit);
 
   if (error || countError) {
-    myLogs("❌ Failed to fetch leaderboard:", error || countError)
+    myLogs("❌ Failed to fetch leaderboard:", error || countError);
     return new EmbedBuilder()
       .setColor("#FF0000")
       .setTitle("⚠️ Error")
@@ -32,10 +32,9 @@ export async function showRankEmbed(limit = 20) {
   }
 
   let text = "```\n";
-  const lineLength = Math.max(30, 10 + footerText.length);
-  text += "═".repeat(lineLength) + "\n";
-  text += "    TOP PLAYER — SEASON 1\n";
-  text += "==============================\n\n";
+  text += "═════════════════════════════════════════════" + "\n";
+  text += "            TOP PLAYER — SEASON 1\n";
+  text += "═════════════════════════════════════════════\n\n";
 
   if (!rankings || rankings.length === 0) {
     for (let i = 1; i <= limit; i++) {
@@ -55,11 +54,21 @@ export async function showRankEmbed(limit = 20) {
 
   text += "```";
 
-
-  return new EmbedBuilder()
+  const embed = new EmbedBuilder()
     .setColor("#FFD700")
     .setTitle("🏆 TOP PLAYER 🏆")
     .setDescription(text)
+    .setImage("attachment://list-rank-bg.png")
     .setFooter({ text: `${footerText} • Keep grinding noobs 💪` })
     .setTimestamp();
+
+  return {
+    embeds: [embed],
+    files: [
+      {
+        attachment: "./src/assets/list-rank-bg.png",
+        name: "list-rank-bg.png",
+      },
+    ],
+  };
 }

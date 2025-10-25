@@ -43,7 +43,7 @@ const client = new Client({
 });
 
 client.once("clientReady", async () => {
-  myLogs(`✅  Logged in as ${client.user.tag}`)
+  myLogs(`✅  Logged in as ${client.user.tag}`);
 
   await addRankEmbed(client);
   await sendRegisterMessage(client);
@@ -51,9 +51,11 @@ client.once("clientReady", async () => {
 });
 
 client.on("messageCreate", async (msg) => {
+  const channel = msg.channel;
+
   if (msg.content.startsWith("$")) {
     const command = msg.content.slice(1).split(" ")[0];
-     const args = msg.content.slice(command.length + 1).trim()
+    const args = msg.content.slice(command.length + 1).trim();
 
     try {
       switch (command) {
@@ -75,7 +77,6 @@ client.on("messageCreate", async (msg) => {
             );
           }
 
-          const channel = msg.channel;
 
           try {
             const fetched = await channel.messages.fetch({ limit: 100 });
@@ -92,20 +93,26 @@ client.on("messageCreate", async (msg) => {
               confirmMsg.delete().catch(() => {});
             }, 3000);
           } catch (err) {
-            myLogs("❌  ", err)
+            myLogs("❌  ", err);
             msg.reply("❌ Failed to delete message (might be too old 14 day).");
           }
           break;
 
         case "showrank":
-            const embed = await showRankEmbed(args);
-            msg.reply({ embeds: [embed] });
+          // if(msg.author.id == "1392481215205871618") {
+          //   return msg.reply("STFU MIZU NOOOBBB")
+          // } else if(msg.author.id == "878215711779090443") {
+          //   msg.reply("YESS MY GOAT HEARTLY :heart:")
+          // }
+          const limit = parseInt(args[0]) || 20;
+          const result = await showRankEmbed(limit);
+          await channel.send(result);
           break;
         default:
           msg.reply(`Couldn't find **${command}** command.`);
       }
     } catch (error) {
-      myLogs("❌  Error executing command:", error)
+      myLogs("❌  Error executing command:" + error);
       msg.reply("There was an error trying to execute that command!");
     }
   }
