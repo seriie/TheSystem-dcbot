@@ -6,7 +6,7 @@ const logFile = path.join(logDir, "app.json");
 
 export const myLogs = (text) => {
   const now = new Date();
-  let dateTime = now.toLocaleString().replace(/[\,]/g, "");
+  let dateTime = now.toISOString().replace(/[\,]/g, "");
   const logLine = `${dateTime} | ${text}`;
 
   console.log(logLine);
@@ -24,6 +24,6 @@ export const myLogs = (text) => {
       fs.writeFileSync(logFile, JSON.stringify(existing, null, 2));
     }
   } catch (err) {
-    console.error("⚠️ Gagal nulis log ke file:", err);
+    console.error("⚠️ Failed to write file:", err);
   }
 };
