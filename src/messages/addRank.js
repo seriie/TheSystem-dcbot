@@ -15,22 +15,22 @@ export const addRankEmbed = async (client) => {
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
-    console.error("\n[❌]   Rank channel not found!");
+    console.error("\n❌  Rank channel not found!");
     return;
   }
 
   try {
-    console.log("\n[🧹]   Purging ALL messages in register channel...");
+    console.log("\n🧹  Purging ALL messages in register channel...");
     let deleted;
     do {
       const fetched = await channel.messages.fetch({ limit: 100 });
       if (fetched.size === 0) break;
       deleted = await channel.bulkDelete(fetched, true);
-      console.log(`\n[🗑️]   Deleted ${deleted.size} messages...`);
+      console.log(`\n🗑️  Deleted ${deleted.size} messages...`);
       await new Promise((r) => setTimeout(r, 1500));
     } while (deleted.size > 0);
   } catch (err) {
-    console.error("\n[⚠️]   Failed to delete messages:", err);
+    console.error("\n⚠️  Failed to delete messages:", err);
   }
 
   const embed = new EmbedBuilder()
@@ -62,7 +62,7 @@ export const addRankEmbed = async (client) => {
      }
     ],
   });
-  console.log("\n[✅]   Add Rank message sent!");
+  console.log("\n✅  Add Rank message sent!");
 };
 
 export const handleRankButton = async (interaction) => {
