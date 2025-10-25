@@ -48,14 +48,14 @@ export const handleSelectPlayer = async (interaction) => {
   const user = interaction.user;
 
   if (player === user.username) {
-    console.log(`[⚠️] ${user.username} is trying to rank himself`);
+    console.log(`\n[⚠️]   ${user.username} is trying to rank himself`);
     return interaction.reply({
       content: "🚫 You can’t rank yourself, silly!",
       ephemeral: true,
     });
   }
 
-  console.log(`[📑] ${user.username} selected ${player}!`)
+  console.log(`\n[📑]   ${user.username} selected ${player}!`)
 
   const modal = new ModalBuilder()
     .setCustomId(`rank_modal_${player}`)
@@ -114,7 +114,7 @@ export const handleModalSubmit = async (interaction) => {
     .single();
 
   if (userError || !userData) {
-    console.error("[🔎] User not found:", userError);
+    console.error("\n[🔎]   User not found:", userError);
     return interaction.reply({
       content: "❌ Player not found in database.",
       ephemeral: true,
@@ -136,24 +136,24 @@ export const handleModalSubmit = async (interaction) => {
 
   // Update for user ranked marking
   try {
-    console.log("[🔄] updating rank status...");
+    console.log("\n[🔄]   updating rank status...");
     await supabase
       .from("users")
       .update({ rank_verified: true })
       .eq("id", user_id);
   } catch (e) {
-    console.error("[❌] Error updating user:", e);
+    console.error("\n[❌]   Error updating user:", e);
   }
 
   if (error) {
-    console.error("[❌]", error);
+    console.error("\n[❌]   ", error);
     return interaction.reply({
       content: "[❌] Failed to save data.",
       ephemeral: true,
     });
   }
 
-  console.log(`📊 ${interaction.user.username} have ranked ${player}`)
+  console.log(`\n📊   ${interaction.user.username} have ranked ${player}`)
 
   await interaction.reply({
     content: `✅ Ranking for **${player}** saved successfully! Average rank: **${rank.toFixed(
