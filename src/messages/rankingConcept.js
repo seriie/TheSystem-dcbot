@@ -1,5 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import dotenv from "dotenv";
+import { myLogs } from "../utils/myLogs.js";
 dotenv.config();
 
 export const rankingConceptEmbed = async (client) => {
@@ -7,22 +8,22 @@ export const rankingConceptEmbed = async (client) => {
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
-    console.error("\n❌  Ranking concept channel not found!");
+    myLogs("❌  Ranking concept channel not found!")
     return;
   }
 
   try {
-    console.log("\n🧹  Purging ALL messages in register channel...");
+    myLogs("🧹  Purging ALL messages in register channel...");
     let deleted;
     do {
       const fetched = await channel.messages.fetch({ limit: 100 });
       if (fetched.size === 0) break;
       deleted = await channel.bulkDelete(fetched, true);
-      console.log(`\n🗑️  Deleted ${deleted.size} messages...`);
+      myLogs(`🗑️  Deleted ${deleted.size} messages...`)
       await new Promise((r) => setTimeout(r, 1500));
     } while (deleted.size > 0);
   } catch (err) {
-    console.error("\n⚠️  Failed to delete messages:", err);
+    myLogs("\n⚠️  Failed to delete messages:", err)
   }
 
   const embed = new EmbedBuilder()
@@ -59,5 +60,5 @@ We will make a rating system from Shooting, Passing, Blocking, Playmaking, and S
       },
     ],
   });
-  console.log("\n✅  Ranking concept message sent successfully!");
+  myLogs("✅  Ranking concept message sent successfully!")
 };

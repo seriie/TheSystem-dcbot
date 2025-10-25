@@ -11,6 +11,7 @@ import { nanoIdFormat } from "../utils/nanoid.js";
 import { supabase } from "../config/supabase.js";
 
 import dotenv from "dotenv";
+import { myLogs } from "../utils/myLogs.js";
 dotenv.config();
 
 // === SEND REGISTER MESSAGE ===
@@ -19,22 +20,22 @@ export const sendRegisterMessage = async (client) => {
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
-    console.error("\n❌  Register channel not found!");
+    myLogs("❌  Register channel not found!")
     return;
   }
 
   try {
-    console.log("\n🧹  Purging ALL messages in register channel...");
+    myLogs("🧹  Purging ALL messages in register channel...")
     let deleted;
     do {
       const fetched = await channel.messages.fetch({ limit: 100 });
       if (fetched.size === 0) break;
       deleted = await channel.bulkDelete(fetched, true);
-      console.log(`\n🗑️  Deleted ${deleted.size} messages...`);
+      myLogs(`🗑️  Deleted ${deleted.size} messages...`)
       await new Promise((r) => setTimeout(r, 1500));
     } while (deleted.size > 0);
   } catch (err) {
-    console.error("\n⚠️  Failed to delete messages:", err);
+    myLogs("⚠️  Failed to delete messages:", err)
   }
 
   const embed = new EmbedBuilder()
@@ -66,14 +67,14 @@ export const sendRegisterMessage = async (client) => {
     },
   ],
   });
-  console.log("\n✅  Register message sent successfully!");
+  myLogs("✅  Register message sent successfully!")
 };
 
 // === HANDLE BUTTON CLICK ===
 export const handleRegisterButton = async (interaction) => {
   if (!interaction.isButton() || interaction.customId !== "register_user")
     return;
-  console.log(`\n📝  ${interaction.user.username} is trying to register...`);
+  myLogs(`📝  ${interaction.user.username} is trying to register...`)
 
   const userId = interaction.user.id;
   const username = interaction.user.username;
@@ -86,7 +87,7 @@ export const handleRegisterButton = async (interaction) => {
     .single();
 
   if (existingUser) {
-    console.log(`!  ${username} already registered`)
+    myLogs(`❗ ${username} already registered`)
     return interaction.reply({
       content: `❗ You are already registered, ${username}!`,
       ephemeral: true,
@@ -113,7 +114,7 @@ export const handleRegisterButton = async (interaction) => {
 
 // === HANDLE MODAL SUBMIT ===
 export const handleRegisterModal = async (interaction) => {
-  console.log("\n🔄  Handling register modal submission...");
+  myLogs("🔄  Handling register modal submission...")
   if (!interaction.isModalSubmit() || interaction.customId !== "register_modal")
     return;
 
@@ -135,14 +136,14 @@ export const handleRegisterModal = async (interaction) => {
   const { error } = await supabase.from("users").insert(userData);
 
   if (error) {
-    console.error("\n❌  Failed to insert user:", error);
+    myLogs("❌  Failed to insert user:", error);
     return interaction.reply({
       content: "⚠️ Failed to register. Please try again later.",
       ephemeral: true,
     });
   }
 
-  console.log(`\n✅  ${interaction.user.username} have been registered!`)
+  myLogs(`✅  ${interaction.user.username} have been registered!`);
   await interaction.reply({
     content: `✅ Successfully registered, **${username}**!\nYour Roblox username: **${robloxUsername}** 🎮`,
     ephemeral: true,

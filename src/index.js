@@ -20,6 +20,8 @@ import {
   handleModalSubmit,
 } from "./commands/addrank.js";
 
+import { myLogs } from "./utils/myLogs.js";
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -41,7 +43,7 @@ const client = new Client({
 });
 
 client.once("clientReady", async () => {
-  console.log(`\n✅  Logged in as ${client.user.tag}`);
+  myLogs(`✅  Logged in as ${client.user.tag}`)
 
   await addRankEmbed(client);
   await sendRegisterMessage(client);
@@ -51,6 +53,7 @@ client.once("clientReady", async () => {
 client.on("messageCreate", async (msg) => {
   if (msg.content.startsWith("$")) {
     const command = msg.content.slice(1).split(" ")[0];
+     const args = msg.content.slice(command.length + 1).trim()
 
     try {
       switch (command) {
@@ -89,20 +92,20 @@ client.on("messageCreate", async (msg) => {
               confirmMsg.delete().catch(() => {});
             }, 3000);
           } catch (err) {
-            console.error("\n❌  ", err);
+            myLogs("❌  ", err)
             msg.reply("❌ Failed to delete message (might be too old 14 day).");
           }
           break;
 
         case "showrank":
-          const embed = showRankEmbed();
-          msg.reply({ embeds: [embed] });
+            const embed = await showRankEmbed(args);
+            msg.reply({ embeds: [embed] });
           break;
         default:
           msg.reply(`Couldn't find **${command}** command.`);
       }
     } catch (error) {
-      console.error("\n❌  Error executing command:", error);
+      myLogs("❌  Error executing command:", error)
       msg.reply("There was an error trying to execute that command!");
     }
   }

@@ -8,6 +8,7 @@ import {
 import { getUnrankedUsers } from "../db/getUnrankedUsers.js";
 
 import dotenv from "dotenv";
+import { myLogs } from "../utils/myLogs.js";
 dotenv.config();
 
 export const addRankEmbed = async (client) => {
@@ -15,22 +16,22 @@ export const addRankEmbed = async (client) => {
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
-    console.error("\n❌  Rank channel not found!");
+    myLogs("❌  Rank channel not found!")
     return;
   }
 
   try {
-    console.log("\n🧹  Purging ALL messages in register channel...");
+    myLogs("🧹  Purging ALL messages in register channel...")
     let deleted;
     do {
       const fetched = await channel.messages.fetch({ limit: 100 });
       if (fetched.size === 0) break;
       deleted = await channel.bulkDelete(fetched, true);
-      console.log(`\n🗑️  Deleted ${deleted.size} messages...`);
+      myLogs(`🗑️  Deleted ${deleted.size} messages...`)
       await new Promise((r) => setTimeout(r, 1500));
     } while (deleted.size > 0);
   } catch (err) {
-    console.error("\n⚠️  Failed to delete messages:", err);
+    myLogs("⚠️  Failed to delete messages:", err)
   }
 
   const embed = new EmbedBuilder()
@@ -62,7 +63,7 @@ export const addRankEmbed = async (client) => {
      }
     ],
   });
-  console.log("\n✅  Add Rank message sent!");
+  myLogs("✅  Add Rank message sent!")
 };
 
 export const handleRankButton = async (interaction) => {

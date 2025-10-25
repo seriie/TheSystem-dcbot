@@ -8,6 +8,8 @@ import {
 import { supabase } from "../config/supabase.js";
 import { getUnrankedUsers } from "../db/getUnrankedUsers.js";
 
+import { myLogs } from "../utils/myLogs.js";
+
 export const handleRankButton = async (interaction) => {
   if (!interaction.isButton()) return;
   if (interaction.customId !== "add_rank") return;
@@ -48,14 +50,14 @@ export const handleSelectPlayer = async (interaction) => {
   const user = interaction.user;
 
   if (player === user.username) {
-    console.log(`\n⚠️  ${user.username} is trying to rank himself`);
+    myLogs(`⚠️  ${user.username} is trying to rank himself`)
     return interaction.reply({
       content: "🚫 You can’t rank yourself, silly!",
       ephemeral: true,
     });
   }
 
-  console.log(`\n📑  ${user.username} selected ${player}!`)
+  myLogs(`📑  ${user.username} selected ${player}!`)
 
   const modal = new ModalBuilder()
     .setCustomId(`rank_modal_${player}`)
@@ -114,7 +116,7 @@ export const handleModalSubmit = async (interaction) => {
     .single();
 
   if (userError || !userData) {
-    console.error("\n🔎  User not found:", userError);
+    myLogs("🔎  User not found:", userError)
     return interaction.reply({
       content: "❌ Player not found in database.",
       ephemeral: true,
@@ -136,24 +138,24 @@ export const handleModalSubmit = async (interaction) => {
 
   // Update for user ranked marking
   try {
-    console.log("\n🔄  updating rank status...");
+    myLogs("🔄  updating rank status...")
     await supabase
       .from("users")
       .update({ rank_verified: true })
       .eq("id", user_id);
   } catch (e) {
-    console.error("\n❌  Error updating user:", e);
+    myLogs("❌  Error updating user:", e)
   }
 
   if (error) {
-    console.error("\n❌  ", error);
+    myLogs("❌  ", error)
     return interaction.reply({
       content: "❌ Failed to save data.",
       ephemeral: true,
     });
   }
 
-  console.log(`\n📊  ${interaction.user.username} have ranked ${player}`)
+  myLogs(`📊  ${interaction.user.username} have ranked ${player}`)
 
   await interaction.reply({
     content: `✅ Ranking for **${player}** saved successfully! Average rank: **${rank.toFixed(

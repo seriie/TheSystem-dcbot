@@ -1,12 +1,13 @@
 import { supabase } from "../config/supabase.js";
 import { EmbedBuilder } from "discord.js";
 import { formatDate } from "../utils/formatDate.js";
+import { myLogs } from "../utils/myLogs.js";
 
 export const showUsers = async (msg) => {
   const { data, error } = await supabase.from("users").select("*");
 
   if (error) {
-    console.error(error);
+    myLogs(error)
     return msg.reply("⚠️ Failed to get data from database!");
   }
 
@@ -21,7 +22,7 @@ export const showUsers = async (msg) => {
       data
         .map(
           (user, i) =>
-            `**${i + 1}.** ${user.discord_username} — Joined: ${formatDate(user.joined_at) || "❓"}`
+            `**${i + 1}.** ${user.discord_username} ⬩ (${user.roblox_username}) — Joined: ${formatDate(user.joined_at) || "❓"}`
         )
         .join("\n")
     )
