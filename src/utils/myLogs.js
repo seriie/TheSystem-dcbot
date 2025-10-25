@@ -1,14 +1,12 @@
 import fs from "fs";
 import path from "path";
 
-const logDir = path.join(process.cwd(), "src", "logs");
+const logDir = path.join(process.cwd(), "logs");
 const logFile = path.join(logDir, "app.json");
 
 export const myLogs = (text) => {
   const now = new Date();
-  let dateTime = now.toLocaleString();
-
-  dateTime = dateTime.replace(/[\,]/g, "");
+  let dateTime = now.toLocaleString().replace(/[\,]/g, "");
   const logLine = `${dateTime} | ${text}`;
 
   console.log(logLine);
