@@ -86,6 +86,7 @@ export const handleRegisterButton = async (interaction) => {
     .single();
 
   if (existingUser) {
+    console.log(`!  ${username} already registered`)
     return interaction.reply({
       content: `❗ You are already registered, ${username}!`,
       ephemeral: true,
