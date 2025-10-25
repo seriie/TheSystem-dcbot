@@ -15,27 +15,27 @@ export const addRankEmbed = async (client) => {
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
-    console.error("❌ Rank channel not found!");
+    console.error("[❌] Rank channel not found!");
     return;
   }
 
   try {
-    console.log("🧹 Purging ALL messages in register channel...");
+    console.log("[🧹] Purging ALL messages in register channel...");
     let deleted;
     do {
       const fetched = await channel.messages.fetch({ limit: 100 });
       if (fetched.size === 0) break;
       deleted = await channel.bulkDelete(fetched, true);
-      console.log(`🗑️ Deleted ${deleted.size} messages...`);
+      console.log(`[🗑️] Deleted ${deleted.size} messages...`);
       await new Promise((r) => setTimeout(r, 1500));
     } while (deleted.size > 0);
   } catch (err) {
-    console.error("⚠️ Failed to delete messages:", err);
+    console.error("[⚠️] Failed to delete messages:", err);
   }
 
   const embed = new EmbedBuilder()
     .setColor("#ff0000")
-    .setTitle("🏆 Add New Rank")
+    .setTitle("🏆Add New Rank")
     .setDescription(
       "Click the button below to add a new rank to the ranking system.\n\n" +
         "Make sure to provide accurate information when prompted!"
@@ -62,7 +62,7 @@ export const addRankEmbed = async (client) => {
      }
     ],
   });
-  console.log("✅ Add Rank message sent!");
+  console.log("[✅] Add Rank message sent!");
 };
 
 export const handleRankButton = async (interaction) => {

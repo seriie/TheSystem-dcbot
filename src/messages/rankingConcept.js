@@ -7,22 +7,22 @@ export const rankingConceptEmbed = async (client) => {
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
-    console.error("❌ Ranking concept channel not found!");
+    console.error("[❌] Ranking concept channel not found!");
     return;
   }
 
   try {
-    console.log("🧹 Purging ALL messages in register channel...");
+    console.log("[🧹] Purging ALL messages in register channel...");
     let deleted;
     do {
       const fetched = await channel.messages.fetch({ limit: 100 });
       if (fetched.size === 0) break;
       deleted = await channel.bulkDelete(fetched, true);
-      console.log(`🗑️ Deleted ${deleted.size} messages...`);
+      console.log(`[🗑️] Deleted ${deleted.size} messages...`);
       await new Promise((r) => setTimeout(r, 1500));
     } while (deleted.size > 0);
   } catch (err) {
-    console.error("⚠️ Failed to delete messages:", err);
+    console.error("[⚠️] Failed to delete messages:", err);
   }
 
   const embed = new EmbedBuilder()
@@ -59,5 +59,5 @@ We will make a rating system from Shooting, Passing, Blocking, Playmaking, and S
       },
     ],
   });
-  console.log("✅ Ranking concept message sent successfully!");
+  console.log("[✅] Ranking concept message sent successfully!");
 };

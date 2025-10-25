@@ -41,7 +41,7 @@ const client = new Client({
 });
 
 client.once("clientReady", async () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
+  console.log(`[✅] Logged in as ${client.user.tag}`);
 
   await addRankEmbed(client);
   await sendRegisterMessage(client);
@@ -89,7 +89,7 @@ client.on("messageCreate", async (msg) => {
               confirmMsg.delete().catch(() => {});
             }, 3000);
           } catch (err) {
-            console.error(err);
+            console.error("[❌]", err);
             msg.reply("❌ Failed to delete message (might be too old 14 day).");
           }
           break;
@@ -102,7 +102,7 @@ client.on("messageCreate", async (msg) => {
           msg.reply(`Couldn't find **${command}** command.`);
       }
     } catch (error) {
-      console.error("Error executing command:", error);
+      console.error("[❌] Error executing command:", error);
       msg.reply("There was an error trying to execute that command!");
     }
   }
