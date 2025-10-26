@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { embedBuilder } from "../helpers/embedBuilder.js";
 import { supabase } from "../config/supabase.js";
 
 import { myLogs } from "../utils/myLogs.js";
@@ -16,10 +16,14 @@ export async function showRankEmbed(limit = 20) {
 
   if (error || countError) {
     myLogs("❌ Failed to fetch leaderboard:", error || countError);
-    return new EmbedBuilder()
-      .setColor("#FF0000")
-      .setTitle("⚠️ Error")
-      .setDescription("Failed to load leaderboard data 😭");
+    return embedBuilder(
+      "#FF0000",
+      "⚠️ Error",
+      "Failed to load leaderboard data 😭",
+      null,
+      "Please try again later 🔧",
+      true
+    );
   }
 
   let footerText = "";
@@ -54,21 +58,12 @@ export async function showRankEmbed(limit = 20) {
 
   text += "```";
 
-  const embed = new EmbedBuilder()
-    .setColor("#FFD700")
-    .setTitle("🏆 TOP PLAYER 🏆")
-    .setDescription(text)
-    .setImage("attachment://list-rank-bg.png")
-    .setFooter({ text: `${footerText} • Keep grinding noobs 💪` })
-    .setTimestamp();
-
-  return {
-    embeds: [embed],
-    files: [
-      {
-        attachment: "./src/assets/list-rank-bg.png",
-        name: "list-rank-bg.png",
-      },
-    ],
-  };
+  return embedBuilder(
+    "#FFD700",
+    "🏆 TOP PLAYER 🏆",
+    text,
+    "./src/assets/list-rank-bg.png",
+    `${footerText} • Keep grinding noobs 💪`,
+    true
+  );
 }

@@ -1,5 +1,5 @@
 import { supabase } from "../config/supabase.js";
-import { EmbedBuilder } from "discord.js";
+import { embedBuilder } from "../helpers/embedBuilder.js";
 import { formatDate } from "../utils/formatDate.js";
 import { myLogs } from "../utils/myLogs.js";
 
@@ -7,7 +7,7 @@ export const showUsers = async (msg) => {
   const { data, error } = await supabase.from("users").select("*");
 
   if (error) {
-    myLogs(error)
+    myLogs(error);
     return msg.reply("⚠️ Failed to get data from database!");
   }
 
@@ -15,19 +15,23 @@ export const showUsers = async (msg) => {
     return msg.reply("No users found 😅");
   }
 
-  const embed = new EmbedBuilder()
-    .setColor("#00BFFF")
-    .setTitle("👥 Registered users list")
-    .setDescription(
-      data
-        .map(
-          (user, i) =>
-            `**${i + 1}.** ${user.discord_username} ⬩ (${user.roblox_username}) — Joined: ${formatDate(user.joined_at) || "❓"}`
-        )
-        .join("\n")
+  const description = data
+    .map(
+      (user, i) =>
+        `**${i + 1}.** ${user.discord_username} ⬩ (${
+          user.roblox_username
+        }) — Joined: ${formatDate(user.joined_at) || "❓"}`
     )
-    .setFooter({ text: `Total users: ${data.length}` })
-    .setTimestamp();
+    .join("\n");
 
-  await msg.reply({ embeds: [embed] });
+  const embed = embedBuilder(
+    "#00BFFF",
+    "👥 Registered users list",
+    description,
+    null,
+    `Total users: ${data.length}`,
+    true
+  );
+
+  await msg.reply(embed);
 };

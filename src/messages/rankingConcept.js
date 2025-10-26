@@ -49,7 +49,7 @@ Basically, when a team wins, **they gain 32 points**, and the losing team **lose
 
 <#1430793940117880893>
 Your ratings from **Offence, Defence, Playmaking, Vision,and Style Mastery** will be given by our **official or trial rankers.**
-All ratings will be processed and posted once complete.
+Stats will be taken from **top players stat. These stats** will then be ranked and compared to determine the **Top Stat players in each category.**
         `
     )
     .setImage("attachment://rankingConcept-bg.png")

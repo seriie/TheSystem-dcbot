@@ -14,6 +14,20 @@ import { rankingConceptEmbed } from "./messages/rankingConcept.js";
 //  Rankings
 import { addRankEmbed } from "./messages/addRank.js";
 
+//  Clubs rankings
+import {
+  handleClubRankButton,
+  handleClubSelection,
+  handleClubResultModal,
+  addClubsRankEmbed
+} from "./commands/addClubsRank.js";
+import { handleRegisterClubs } from "./commands/registerClubs.js";
+import { handleRegisterClubModal } from "./commands/registerClubs.js";
+
+//  Match summary
+import { addSummaryEmbed, handleSummaryButton, handleSummaryModal, handleSummarySelection } from "./commands/addSummary.js";
+import { showAllSummaries } from "./commands/showAllSummeries.js";
+
 import {
   handleRankButton,
   handleSelectPlayer,
@@ -42,12 +56,42 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 
+// const userIds = [
+//   '1302966601062285391',
+//   '862553441292910633',
+//   '1204771187608256586'
+// ];
+
 client.once("clientReady", async () => {
   myLogs(`✅  Logged in as ${client.user.tag}`);
 
+  //     for (const id of userIds) {
+  //     try {
+  //       const user = await client.users.fetch(id);
+  //       await user.send(`
+  //         We invited you to our secret server that still developing, and we currently need a good mod for this secret server. so i wanna ask you if you want to be our mod in this secret server, join this server if u agree and please do not share this to the others
+  // https://discord.gg/7mU692ucm
+  //         `);
+  //       console.log(`✅ DM terkirim ke ${user.tag}`);
+  //     } catch (error) {
+  //       console.error(`❌ Gagal kirim DM ke ID ${id}:`, error.message);
+  //     }
+  //   }
+
+  // Add rank
   await addRankEmbed(client);
+
+  // Clubs rank
+  await addClubsRankEmbed(client);
+
+  // Register player
   await sendRegisterMessage(client);
+
+  // Rank concept
   await rankingConceptEmbed(client);
+
+  // Match summary
+  await addSummaryEmbed(client);
 });
 
 client.on("messageCreate", async (msg) => {
@@ -76,7 +120,6 @@ client.on("messageCreate", async (msg) => {
               "❌ U don't have permissions to use this command!"
             );
           }
-
 
           try {
             const fetched = await channel.messages.fetch({ limit: 100 });
@@ -119,14 +162,27 @@ client.on("messageCreate", async (msg) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  // Rankins
+  // Player rankins
   await handleRankButton(interaction);
   await handleSelectPlayer(interaction);
   await handleModalSubmit(interaction);
 
+  // Clubs rank
+  await handleClubRankButton(interaction);
+  await handleClubSelection(interaction);
+  await handleClubResultModal(interaction);
+  await handleRegisterClubs(interaction)
+  await handleRegisterClubModal(interaction);
+
   // Register
   await handleRegisterButton(interaction);
   await handleRegisterModal(interaction);
+
+  // Match summary
+  await handleSummaryButton(interaction);
+  await handleSummaryModal(interaction);
+  await handleSummarySelection(interaction);
+  await showAllSummaries(interaction);
 });
 
 client.login(process.env.TOKEN);
