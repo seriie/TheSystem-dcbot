@@ -1,4 +1,6 @@
 import express from "express";
+import { supabase } from "./config/supabase.js";
+import { myLogs } from "./utils/myLogs.js";
 import { Client, GatewayIntentBits, EmbedBuilder, Partials } from "discord.js";
 import { showRankEmbed } from "./commands/showRank.js";
 import { showUsers } from "./commands/showUsers.js";
@@ -19,13 +21,18 @@ import {
   handleClubRankButton,
   handleClubSelection,
   handleClubResultModal,
-  addClubsRankEmbed
+  addClubsRankEmbed,
 } from "./commands/addClubsRank.js";
 import { handleRegisterClubs } from "./commands/registerClubs.js";
 import { handleRegisterClubModal } from "./commands/registerClubs.js";
 
 //  Match summary
-import { addSummaryEmbed, handleSummaryButton, handleSummaryModal, handleSummarySelection } from "./commands/addSummary.js";
+import {
+  addSummaryEmbed,
+  handleSummaryButton,
+  handleSummaryModal,
+  handleSummarySelection,
+} from "./commands/addSummary.js";
 import { showAllSummaries } from "./commands/showAllSummeries.js";
 
 import {
@@ -33,8 +40,6 @@ import {
   handleSelectPlayer,
   handleModalSubmit,
 } from "./commands/addrank.js";
-
-import { myLogs } from "./utils/myLogs.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -114,6 +119,37 @@ client.on("messageCreate", async (msg) => {
           break;
         case "rank":
           break;
+        case "resetrank":
+          try {
+            const allowedRoleId = process.env.OFFICIAL_RANKER_ROLE_ID;
+
+            if (!msg.member.roles.cache.has(allowedRoleId)) {
+              await msg.reply("🚫 You are not allowed.");
+              return;
+            }
+
+            const { error } = await supabase
+              .from("rankings")
+              .delete()
+              .neq("id", 0);
+
+            if (error) {
+              myLogs(
+                "❌ Failed to reset player rankings: " + JSON.stringify(error)
+              );
+              await msg.reply("⚠️ Failed to delete rank data.");
+              return;
+            }
+
+            myLogs("✅ All rank players has been deleted.");
+            await msg.reply(
+              "✅ All data **player rank** deleted from database."
+            );
+          } catch (e) {
+            myLogs("💥 Unexpected error saat reset rank: " + e.message);
+            await msg.reply("💥 Error while trying to delete data.");
+          }
+          break;
         case "bulkdelete":
           if (!msg.member.permissions.has("ManageMessages")) {
             return msg.reply(
@@ -171,7 +207,7 @@ client.on("interactionCreate", async (interaction) => {
   await handleClubRankButton(interaction);
   await handleClubSelection(interaction);
   await handleClubResultModal(interaction);
-  await handleRegisterClubs(interaction)
+  await handleRegisterClubs(interaction);
   await handleRegisterClubModal(interaction);
 
   // Register
