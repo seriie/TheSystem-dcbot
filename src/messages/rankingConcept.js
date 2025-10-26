@@ -31,20 +31,25 @@ export const rankingConceptEmbed = async (client) => {
     .setTitle("🧠 Ranking Concept")
     .setDescription(
       `
-        Asia Ranking, Ranking concept
-⁠⬩<#1430790441036414986>
-You will be observe by any of our staff if any of them in the scrim that's happening and will impact your ranking depending on your performance or you can send an ss of the scrim stat to one of our staff and we might consider it (friendly didnt count)
+𝗔𝘀𝗶𝗮 𝗥𝗮𝗻𝗸𝗶𝗻𝗴 𝗖𝗼𝗻𝗰𝗲𝗽𝘁
+<#1430790441036414986>
+You will be observed by our **official or trial ranker** during any scrim that’s happening. Your ranking will be affected based on your **performance**, which will be evaluated from **Offence, Defence, Vision, Style Mastery, and Playmaking.** (friendly match is not count)
 
-⁠⬩<#1430790486649475193>
-We will create a voting system for the top style ranking and to enter you have to play 1 style and vote and everyone can participate then we will process all the votes and then post the voting results
+<#1430790486649475193>
+We’ll make a **voting system** for the **Top Style Ranking**. To join, you just need to **Main one style or more** and vote. Everyone can participate. After voting ends, we’ll process and post the results.
 
-⁠⬩<#1430790535215317022>
-We will review every scrim record of every server in asia that we know and will procces it and rank the club one by one from the scrim record
+<#1430790535215317022>
+We’ll review all scrim records from different **Asian clubs** and use that data to rank each club based on their performance.
 
-⁠⬩<#1430793940117880893>
-We will make a rating system from Shooting, Passing, Blocking, Playmaking, and Style mastery. you will be rating for all other people and we will procces it and post the results
+The ranking will follow the **ELO system**, where each team’s points go up or down depending on the result of every match.
 
-  We are ready to clear any queries you have!
+We’re using a **sensitivity (K-factor) of 32**, which is the standard value (common options are 16, 32, and 64).
+
+Basically, when a team wins, **they gain 32 points**, and the losing team **loses 32 points** — meaning **the winning team takes 32 points** directly from their opponent.
+
+<#1430793940117880893>
+Your ratings from **Offence, Defence, Playmaking, Vision,and Style Mastery** will be given by our **official or trial rankers.**
+All ratings will be processed and posted once complete.
         `
     )
     .setImage("attachment://rankingConcept-bg.png")
