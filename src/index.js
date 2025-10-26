@@ -198,28 +198,46 @@ client.on("messageCreate", async (msg) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  // Player rankins
-  await handleRankButton(interaction);
-  await handleSelectPlayer(interaction);
-  await handleModalSubmit(interaction);
+  // ID role yang boleh akses rank & summary
+  const allowedRoleId = process.env.OFFICIAL_RANKER_ROLE_ID;
+  const member = interaction.member;
 
-  // Clubs rank
-  await handleClubRankButton(interaction);
-  await handleClubSelection(interaction);
-  await handleClubResultModal(interaction);
-  await handleRegisterClubs(interaction);
-  await handleRegisterClubModal(interaction);
+  const hasAccess = member?.roles?.cache?.has(allowedRoleId);
 
-  // Register
   await handleRegisterButton(interaction);
   await handleRegisterModal(interaction);
 
-  // Match summary
-  await handleSummaryButton(interaction);
-  await handleSummaryModal(interaction);
-  await handleSummarySelection(interaction);
-  await showAllSummaries(interaction);
+  if (hasAccess) {
+    await handleClubRankButton(interaction);
+    await handleClubSelection(interaction);
+    await handleClubResultModal(interaction);
+    await handleRegisterClubs(interaction);
+    await handleRegisterClubModal(interaction);
+  }
+
+  if (hasAccess) {
+    await handleRankButton(interaction);
+    await handleSelectPlayer(interaction);
+    await handleModalSubmit(interaction);
+  }
+
+  if (hasAccess) {
+    await handleSummaryButton(interaction);
+    await handleSummaryModal(interaction);
+    await handleSummarySelection(interaction);
+    await showAllSummaries(interaction);
+  } else if (
+    interaction.customId?.startsWith("rank") ||
+    interaction.customId?.startsWith("summary")
+  ) {
+
+    await interaction.reply({
+      content: "🚫 You dont have perms to do this.",
+      ephemeral: true,
+    });
+  }
 });
+
 
 client.login(process.env.TOKEN);
 
