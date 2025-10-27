@@ -36,7 +36,7 @@ export const showAllSummaries = async (interaction) => {
 
     let textMsg = `# Match #${i + 1} #\n\n # ${clubAData.club_name} vs ${
       clubBData.club_name
-    } #\n## Game Type: ${match.game_type} ##\n\n`;
+    } #\n## Game Type: ${match.game_type} ##\n**Game Format: ${match.game_format}**`;
 
     for (let j = 0; j < match.games.length; j++) {
       const g = match.games[j];

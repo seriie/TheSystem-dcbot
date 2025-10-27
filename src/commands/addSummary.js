@@ -66,8 +66,7 @@ export const addSummaryEmbed = async (client) => {
   const row = new ActionRowBuilder().addComponents(btnAdd, btnShow);
 
   await channel.send({
-    content:
-      "**Match Summary Management** — choose an action below.",
+    content: "**Match Summary Management** — choose an action below.",
     embeds: [embed],
     components: [row],
   });
@@ -151,6 +150,8 @@ export const handleSummarySelection = async (interaction) => {
     sel.clubB = interaction.values[0];
   else if (interaction.customId === "select_summary_type")
     sel.gameType = interaction.values[0];
+  else if (interaction.customId === "select_match_mode")
+    sel.matchMode = interaction.values[0];
   else return;
 
   userSelections.set(uid, sel);
@@ -220,6 +221,26 @@ export const handleSummarySelection = async (interaction) => {
     return;
   }
 
+  // after selecting game type, choose match mode
+  if (!sel.matchMode) {
+    const modeSelect = new StringSelectMenuBuilder()
+      .setCustomId("select_match_mode")
+      .setPlaceholder("Select Match Type")
+      .addOptions([
+        { label: "3v3", value: "3v3" },
+        { label: "4v4", value: "4v4" },
+        { label: "5v5", value: "5v5" },
+      ]);
+
+    const rowMode = new ActionRowBuilder().addComponents(modeSelect);
+
+    await interaction.update({
+      content: "Select match type (3v3 / 4v4 / 5v5)",
+      components: [rowMode],
+    });
+    return;
+  }
+
   const maxGames = sel.gameType === "BO3" ? 3 : 5;
   const modal = new ModalBuilder()
     .setCustomId(
@@ -249,7 +270,8 @@ export const handleSummarySelection = async (interaction) => {
 export const handleSummaryModal = async (interaction) => {
   if (!interaction.isModalSubmit()) return;
   if (!interaction.customId.startsWith("match_summary_modal_")) return;
-
+  const sel = userSelections.get(interaction.user.id) || {};
+  
   const parts = interaction.customId.split("_");
   const clubAId = parts[3];
   const clubBId = parts[4];
@@ -299,6 +321,7 @@ export const handleSummaryModal = async (interaction) => {
     let msgLines = [];
     msgLines.push(`# ${clubAData.club_name} Vs ${clubBData.club_name} #`);
     msgLines.push(`**Game Type: ${gameType}**\n`);
+    msgLines.push(`**Game Format: ${sel.matchMode}**`)
 
     playedGames.forEach((g, i) => {
       const winner = g.a > g.b ? clubAData.club_name : clubBData.club_name;
@@ -315,6 +338,7 @@ export const handleSummaryModal = async (interaction) => {
     await summaryChannel.send(msgLines.join("\n"));
   }
 
+
   // save to DB
   const { error } = await supabase.from("match_summary").insert([
     {
@@ -325,6 +349,7 @@ export const handleSummaryModal = async (interaction) => {
       games: playedGames,
       summary: summaryText,
       ranker: `${interaction.user.username}`,
+      game_format: sel.matchMode
     },
   ]);
 
