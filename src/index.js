@@ -154,6 +154,10 @@ client.on("messageCreate", async (msg) => {
               return;
             }
 
+            const { err } = await supabase
+              .from("users")
+              .update({ rank_verified: false });
+
             const { error } = await supabase
               .from("rankings")
               .delete()
@@ -163,6 +167,13 @@ client.on("messageCreate", async (msg) => {
               myLogs(
                 "❌ Failed to reset player rankings: " + JSON.stringify(error)
               );
+
+              if (err) {
+                myLogs(
+                  "❌ Failed to update rank_verified: " + JSON.stringify(error)
+                );
+              }
+
               await msg.reply("⚠️ Failed to delete rank data.");
               return;
             }
