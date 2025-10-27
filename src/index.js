@@ -117,7 +117,28 @@ client.on("messageCreate", async (msg) => {
         case "verify":
           msg.reply("Verification process started.");
           break;
-        case "rank":
+        case "sendmsg":
+          myLogs(`${msg.author.displayName} trying to send dms`)
+          const [id, ...messageParts] = args.split(" ");
+          const text = messageParts.join(" ");
+
+          if (!id || !text) {
+            return msg.reply(
+              "❌ Invalid format! Use: `$sendmsg {id} {message}`"
+            );
+          }
+
+          try {
+            const user = await client.users.fetch(id);
+            await user.send(text);
+            msg.reply(`✅ Message sent to **${user.displayName}**`);
+            myLogs(`✅  Message sent to **${user.displayName}**`)
+          } catch (err) {
+            myLogs(err);
+            msg.reply(
+              "⚠️ Failed to send DM! recheck the ID!"
+            );
+          }
           break;
         case "resetrank":
           try {
@@ -230,14 +251,12 @@ client.on("interactionCreate", async (interaction) => {
     interaction.customId?.startsWith("rank") ||
     interaction.customId?.startsWith("summary")
   ) {
-
     await interaction.reply({
       content: "🚫 You dont have perms to do this.",
       ephemeral: true,
     });
   }
 });
-
 
 client.login(process.env.TOKEN);
 
