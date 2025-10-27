@@ -52,7 +52,7 @@ Your ratings from **Offence, Defence, Playmaking, Vision,and Style Mastery** wil
 Stats will be taken from **top players stat. These stats** will then be ranked and compared to determine the **Top Stat players in each category.**
         `
     )
-    .setImage("attachment://rankingConcept-bg.png")
+    .setImage("attachment://ranking-concept-bg.png")
     .setTimestamp();
 
   await channel.send({
@@ -60,8 +60,8 @@ Stats will be taken from **top players stat. These stats** will then be ranked a
     embeds: [embed],
     files: [
       {
-        attachment: "./src/assets/rankingConcept-bg.png",
-        name: "rankingConcept-bg.png",
+        attachment: "./src/assets/ranking-concept-bg.png",
+        name: "ranking-concept-bg.png",
       },
     ],
   });
