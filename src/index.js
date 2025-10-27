@@ -154,36 +154,41 @@ client.on("messageCreate", async (msg) => {
               return;
             }
 
-            const { err } = await supabase
+            // Update rank_verified = false
+            const { error: updateError } = await supabase
               .from("users")
-              .update({ rank_verified: false });
+              .update({ rank_verified: false })
+              .eq("rank_verified", true);
 
-            const { error } = await supabase
+            if (updateError) {
+              myLogs(
+                "❌ Failed to update rank_verified: " +
+                  JSON.stringify(updateError)
+              );
+              await msg.reply("⚠️ Failed to update rank_verified field.");
+              return;
+            }
+
+            const { error: deleteError } = await supabase
               .from("rankings")
               .delete()
               .neq("id", 0);
 
-            if (error) {
+            if (deleteError) {
               myLogs(
-                "❌ Failed to reset player rankings: " + JSON.stringify(error)
+                "❌ Failed to reset player rankings: " +
+                  JSON.stringify(deleteError)
               );
-
-              if (err) {
-                myLogs(
-                  "❌ Failed to update rank_verified: " + JSON.stringify(error)
-                );
-              }
-
               await msg.reply("⚠️ Failed to delete rank data.");
               return;
             }
 
-            myLogs("✅ All rank players has been deleted.");
+            myLogs("✅ All rank players have been deleted.");
             await msg.reply(
-              "✅ All data **player rank** deleted from database."
+              "✅ All player rank data deleted, and rank_verified reset!"
             );
           } catch (e) {
-            myLogs("💥 Unexpected error while tryint to reset: " + e.message);
+            myLogs("💥 Unexpected error while trying to reset: " + e.message);
             await msg.reply("💥 Error while trying to delete data.");
           }
           break;
