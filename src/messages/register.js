@@ -39,7 +39,7 @@ export const sendRegisterMessage = async (client) => {
   }
 
   const embed = new EmbedBuilder()
-    .setColor("#ffffff")
+    .setColor("#ff0000")
     .setTitle("🧠 Member Registration")
     .setDescription(
       "Welcome to the server! Click the button below to register as a player.\n\n" +
