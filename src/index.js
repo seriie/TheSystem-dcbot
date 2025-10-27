@@ -183,7 +183,7 @@ client.on("messageCreate", async (msg) => {
               "✅ All data **player rank** deleted from database."
             );
           } catch (e) {
-            myLogs("💥 Unexpected error saat reset rank: " + e.message);
+            myLogs("💥 Unexpected error while tryint to reset: " + e.message);
             await msg.reply("💥 Error while trying to delete data.");
           }
           break;

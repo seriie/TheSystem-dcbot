@@ -31,7 +31,7 @@ export const rankingConceptEmbed = async (client) => {
     .setTitle("🧠 Ranking Concept")
     .setDescription(
       `
-𝗔𝘀𝗶𝗮 𝗥𝗮𝗻𝗸𝗶𝗻𝗴 𝗖𝗼𝗻𝗰𝗲𝗽𝘁
+**Project: Apex Concept**
 <#1430790441036414986>
 You will be observed by our **official or trial ranker** during any scrim that’s happening. Your ranking will be affected based on your **performance**, which will be evaluated from **Offence, Defence, Vision, Style Mastery, and Playmaking.** (friendly match is not count)
 
