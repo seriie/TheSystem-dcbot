@@ -15,6 +15,8 @@ import dotenv from "dotenv";
 import { nanoIdFormat } from "../utils/nanoid.js";
 dotenv.config();
 
+import { matchSummaryMsg } from "../helpers/matchSummaryMsg.js";
+
 // temporary in-memory store per user
 const userSelections = new Map();
 
@@ -51,6 +53,7 @@ export const addSummaryEmbed = async (client) => {
       "Click **Add Match Summary** to submit match results between two clubs.\nSupports BO3 and FT3 match types."
     )
     .setFooter({ text: "Match Summary" })
+    .setImage("attachment://match-summary-bg.png")
     .setTimestamp();
 
   const btnAdd = new ButtonBuilder()
@@ -68,6 +71,12 @@ export const addSummaryEmbed = async (client) => {
   await channel.send({
     content: "**Match Summary Management** — choose an action below.",
     embeds: [embed],
+    files: [
+      {
+        attachment: "./src/assets/match-summary-bg.png",
+        name: "match-summary-bg.png"
+      }
+    ],
     components: [row],
   });
 
@@ -271,7 +280,8 @@ export const handleSummaryModal = async (interaction) => {
   if (!interaction.isModalSubmit()) return;
   if (!interaction.customId.startsWith("match_summary_modal_")) return;
   const sel = userSelections.get(interaction.user.id) || {};
-  
+  const summaryId = nanoIdFormat("MSID", 12);
+
   const parts = interaction.customId.split("_");
   const clubAId = parts[3];
   const clubBId = parts[4];
@@ -287,9 +297,11 @@ export const handleSummaryModal = async (interaction) => {
     scoresA.push(a);
     scoresB.push(b);
   }
+
   const playedGames = scoresA
     .map((a, i) => ({ a, b: scoresB[i] }))
     .filter((g) => g.a || g.b);
+
   let winsA = 0,
     winsB = 0;
   playedGames.forEach((g) => {
@@ -308,48 +320,48 @@ export const handleSummaryModal = async (interaction) => {
     .eq("id", clubBId)
     .single();
 
-  // build plain text summary
   const summaryText = `${winsA}:${winsB} win for ${
     winsA > winsB ? clubAData.club_name : clubBData.club_name
   }`;
+
   const summaryChannelId = process.env.MATCH_SUMMARY_LOG_CHANNEL_ID;
   const summaryChannel = await interaction.client.channels
     .fetch(summaryChannelId)
     .catch(() => null);
 
-  if (summaryChannel) {
-    let msgLines = [];
-    msgLines.push(`# ${clubAData.club_name} Vs ${clubBData.club_name} #`);
-    msgLines.push(`**Game Type: ${gameType}**\n`);
-    msgLines.push(`**Game Format: ${sel.matchMode}**`)
+  const { count } = await supabase
+    .from("match_summary")
+    .select("*", { count: "exact", head: true });
 
-    playedGames.forEach((g, i) => {
-      const winner = g.a > g.b ? clubAData.club_name : clubBData.club_name;
-      msgLines.push(`Game ${i + 1}:\n ${g.a}-${g.b} win for ${winner}\n`);
+  myLogs("Data length: " + count);
+
+  if (summaryChannel) {
+    const msg = matchSummaryMsg({
+      index: count, // biar match # sesuai urutan
+      clubA: clubAData.club_name,
+      clubB: clubBData.club_name,
+      gameType,
+      gameFormat: sel.matchMode,
+      games: playedGames,
+      summary: summaryText,
+      ranker: interaction.user.username,
+      summaryId,
     });
 
-    msgLines.push(
-      `\nSummary: ${winsA}:${winsB} win for ${
-        winsA > winsB ? clubAData.club_name : clubBData.club_name
-      }`
-    );
-    msgLines.push(`Recorded by: **${interaction.user.username}**`);
-
-    await summaryChannel.send(msgLines.join("\n"));
+    await summaryChannel.send(msg);
   }
 
-
-  // save to DB
+  // save ke DB
   const { error } = await supabase.from("match_summary").insert([
     {
-      id: nanoIdFormat("MSID", 12),
+      id: summaryId,
       club_a_id: clubAId,
       club_b_id: clubBId,
       game_type: gameType,
       games: playedGames,
       summary: summaryText,
       ranker: `${interaction.user.username}`,
-      game_format: sel.matchMode
+      game_format: sel.matchMode,
     },
   ]);
 

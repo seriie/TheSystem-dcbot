@@ -218,7 +218,78 @@ client.on("messageCreate", async (msg) => {
             msg.reply("❌ Failed to delete message (might be too old 14 day).");
           }
           break;
+        case "delsummary":
+          try {
+            const allowedRoleId = process.env.OFFICIAL_RANKER_ROLE_ID;
 
+            if (!msg.member.roles.cache.has(allowedRoleId)) {
+              await msg.reply("🚫 You are not allowed.");
+              return;
+            }
+
+            const { error } = await supabase
+              .from("match_summary")
+              .delete()
+              .eq("id", args);
+
+            if (error) throw error;
+
+            myLogs(`✅ Summary ${args} deleted from database`);
+            await msg.reply(`✅ Summary ${args} deleted!`);
+
+            const summaryChannel = await msg.client.channels.fetch(
+              process.env.MATCH_SUMMARY_LOG_CHANNEL_ID
+            );
+
+            let deleted = 0;
+            let messages;
+            do {
+              messages = await summaryChannel.messages.fetch({ limit: 100 });
+              const recent = messages.filter(
+                (m) =>
+                  Date.now() - m.createdTimestamp < 14 * 24 * 60 * 60 * 1000
+              );
+              if (recent.size > 0) {
+                await summaryChannel.bulkDelete(recent);
+                deleted += recent.size;
+              }
+            } while (messages.size >= 2);
+
+            myLogs(`🧹 Deleted ${deleted} old summary messages`);
+
+            const { data: summaries, error: fetchError } = await supabase
+              .from("match_summary")
+              .select("*")
+              .order("created_at", { ascending: false });
+
+            if (fetchError) throw fetchError;
+
+            if (!summaries || summaries.length === 0) {
+              await summaryChannel.send("📭 No match summaries yet.");
+            } else {
+              for (const s of summaries) {
+                await summaryChannel.send(
+                  `**Match #${s.match_number}**
+                    ${s.team_a} Vs ${s.team_b}
+                    Game Type: ${s.game_type}
+                                    
+                    Game Format: ${s.format}
+                    ${s.summary_text}
+                                    
+                    Summary: ${s.result}
+                    Recorded by: ${s.recorded_by}
+                    Summary ID: ${s.id}`
+                );
+              }
+            }
+
+            myLogs(`✅ Summary channel refreshed`);
+          } catch (e) {
+            console.error("❌ Error:", e);
+            myLogs("❌ Failed to delete summary: " + e);
+            msg.reply("❌ Failed to delete summary");
+          }
+          break;
         case "showrank":
           // if(msg.author.id == "1392481215205871618") {
           //   return msg.reply("STFU MIZU NOOOBBB")

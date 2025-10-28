@@ -1,4 +1,5 @@
 import { supabase } from "../config/supabase.js";
+import { matchSummaryMsg } from "../helpers/matchSummaryMsg.js";
 
 export const showAllSummaries = async (interaction) => {
   if (!interaction.isButton()) return;
@@ -34,22 +35,22 @@ export const showAllSummaries = async (interaction) => {
       .eq("id", match.club_b_id)
       .single();
 
-    let textMsg = `# Match #${i + 1} #\n\n # ${clubAData.club_name} vs ${
-      clubBData.club_name
-    } #\n## Game Type: ${match.game_type} ##\n**Game Format: ${match.game_format}**`;
-
-    for (let j = 0; j < match.games.length; j++) {
-      const g = match.games[j];
-      const winner = g.a > g.b ? clubAData.club_name : clubBData.club_name;
-      textMsg += `Game ${j + 1}: ${g.a}-${g.b} win for ${winner}\n\n`;
-    }
-
-    textMsg += `Summary: **${match.summary}**\nRecorded by: **${match.ranker}**\n-# Summary ID: **${match.id}**`;
+    const textMsg = matchSummaryMsg({
+      index: i,
+      clubA: clubAData.club_name,
+      clubB: clubBData.club_name,
+      gameType: match.game_type,
+      gameFormat: match.game_format,
+      games: match.games,
+      summary: match.summary,
+      ranker: match.ranker,
+      summaryId: match.id,
+    });
 
     await summaryChannel.send(textMsg);
   }
 
   await interaction.reply({
-    content: `✅ All ${matches.length + 1} summary has showen!`,
+    content: `✅ All ${matches.length} summary has showen!`,
   });
 };
