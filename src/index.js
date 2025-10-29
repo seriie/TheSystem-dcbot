@@ -26,6 +26,8 @@ import {
 import { handleRegisterClubs } from "./commands/registerClubs.js";
 import { handleRegisterClubModal } from "./commands/registerClubs.js";
 
+import { showClubRankEmbed } from "./commands/showClubRank.js";
+
 //  Match summary
 import {
   addSummaryEmbed,
@@ -112,7 +114,7 @@ client.on("messageCreate", async (msg) => {
           msg.reply("Pong!");
           break;
         case "users":
-          await showUsers(msg);
+          await showUsers(msg, args);
           break;
         case "verify":
           msg.reply("Verification process started.");
@@ -300,6 +302,11 @@ client.on("messageCreate", async (msg) => {
           const result = await showRankEmbed(limit);
           await channel.send(result);
           break;
+        case "showclubrank":
+          const clubLimit = parseInt(args[0]) || 10;
+          const clubResult = await showClubRankEmbed(clubLimit);
+          await channel.send(clubResult);
+          break;
         default:
           msg.reply(`Couldn't find **${command}** command.`);
       }
@@ -311,11 +318,13 @@ client.on("messageCreate", async (msg) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  // ID role yang boleh akses rank & summary
-  const allowedRoleId = process.env.OFFICIAL_RANKER_ROLE_ID;
+  const allowedRoleId = [
+    process.env.OFFICIAL_RANKER_ROLE_ID,
+    process.env.LEAD_RANKER_ROLE_ID
+  ]
   const member = interaction.member;
 
-  const hasAccess = member?.roles?.cache?.has(allowedRoleId);
+  const hasAccess = member?.roles?.cache?.some(role => allowedRoleId.includes(role));
 
   await handleRegisterButton(interaction);
   await handleRegisterModal(interaction);

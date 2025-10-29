@@ -1,6 +1,6 @@
 {
   "ignore": [
     "README.md",
-    "logs/*",
+    "logs/*"
   ]
 }

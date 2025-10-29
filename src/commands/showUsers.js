@@ -3,8 +3,8 @@ import { embedBuilder } from "../helpers/embedBuilder.js";
 import { formatDate } from "../utils/formatDate.js";
 import { myLogs } from "../utils/myLogs.js";
 
-export const showUsers = async (msg) => {
-  const { data, error } = await supabase.from("users").select("*");
+export const showUsers = async (msg, limit = 25) => {
+  const { data, error } = await supabase.from("users").select("*").order("joined_at", { ascending: true }).limit(limit);
 
   if (error) {
     myLogs(error);
@@ -20,7 +20,7 @@ export const showUsers = async (msg) => {
       (user, i) =>
         `**${i + 1}.** ${user.discord_username} ⬩ (${
           user.roblox_username
-        }) — Joined: ${formatDate(user.joined_at) || "❓"}`
+        }) — ${formatDate(user.joined_at) || "❓"}`
     )
     .join("\n");
 

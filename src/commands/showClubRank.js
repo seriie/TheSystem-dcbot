@@ -1,21 +1,16 @@
 import { embedBuilder } from "../helpers/embedBuilder.js";
 import { supabase } from "../config/supabase.js";
-
 import { myLogs } from "../utils/myLogs.js";
 
-export async function showRankEmbed(limit = 20) {
-  const { count: totalRanked, error: countError } = await supabase
-    .from("rankings")
-    .select("*", { count: "exact", head: true });
-
+export async function showClubRankEmbed(limit = 10) {
   const { data: rankings, error } = await supabase
-    .from("rankings")
-    .select("discord_username, rank")
-    .order("rank", { ascending: false })
+    .from("club_rankings")
+    .select("club_id, elo, clubs(club_name)")
+    .order("elo ", { ascending: false })
     .limit(limit);
 
-  if (error || countError) {
-    myLogs("❌ Failed to fetch leaderboard:", error || countError);
+  if (error) {
+    myLogs("❌ Failed to fetch leaderboard:" + JSON.stringify(error) || JSON.stringify(countError));
     return embedBuilder(
       "#FF0000",
       "⚠️ Error",
@@ -26,19 +21,12 @@ export async function showRankEmbed(limit = 20) {
     );
   }
 
-  let footerText = "";
-  if (limit > totalRanked) {
-    footerText = `Only ${totalRanked} players are currently ranked 👀`;
-  } else if (limit < totalRanked) {
-    footerText = `Showing top ${limit} of ${totalRanked} ranked players 🔝`;
-  } else {
-    footerText = `Showing top ${totalRanked} ranked players 🔝`;
-  }
+  let footerText = `Showing ${rankings.length} clubs  `;
 
   let text = "```\n";
   // text += "═════════════════════════════════════════════" + "\n";
   // text += "            TOP PLAYER — SEASON 1\n";
-  text += "TOP PLAYER — SEASON 1\n\n";
+  text += "TOP CLUB — SEASON 1\n\n";
   // text += "═════════════════════════════════════════════\n\n";
 
   if (!rankings || rankings.length === 0) {
@@ -47,9 +35,7 @@ export async function showRankEmbed(limit = 20) {
     }
   } else {
     rankings.forEach((p, i) => {
-      text += `${i + 1}. [ ${p.discord_username} ] — ${p.rank.toFixed(
-        2
-      )} ovr\n`;
+      text += `${i + 1}. [ ${p.clubs.club_name} ] — ${p.elo} elo\n`;
     });
 
     for (let i = rankings.length + 1; i <= limit; i++) {
@@ -61,9 +47,9 @@ export async function showRankEmbed(limit = 20) {
 
   return embedBuilder(
     "#FFD700",
-    "🏆 TOP PLAYER 🏆",
+    "🏆 TOP CLUB 🏆",
     text,
-    "./src/assets/list-rank-bg.png",
+    "./src/assets/club-rank-bg.png",
     `${footerText} • Keep grinding noobs 💪`,
     true
   );

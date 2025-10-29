@@ -254,6 +254,7 @@ export const handleClubSelection = async (interaction) => {
 export const handleClubResultModal = async (interaction) => {
   if (!interaction.isModalSubmit()) return;
   if (!interaction.customId.startsWith("club_result_modal_")) return;
+  myLogs(`${interaction.author.id} trying to add club ranking`)
 
   // parse club ids from customId
   // format: club_result_modal_<clubAId>_<clubBId>
