@@ -254,7 +254,7 @@ export const handleClubSelection = async (interaction) => {
 export const handleClubResultModal = async (interaction) => {
   if (!interaction.isModalSubmit()) return;
   if (!interaction.customId.startsWith("club_result_modal_")) return;
-  myLogs(`${interaction.author.id} trying to add club ranking`)
+  myLogs(`${interaction.user.id} trying to add club ranking`)
 
   // parse club ids from customId
   // format: club_result_modal_<clubAId>_<clubBId>
@@ -345,54 +345,12 @@ export const handleClubResultModal = async (interaction) => {
   const eloA_after = updated[clubAName];
   const eloB_after = updated[clubBName];
 
-  // insert two rows into clubs_rankings (one per club) with opponent_id, win, lose, elo, ranker, match_date
-  const matchDate = new Date().toISOString();
-  const ranker = `${interaction.user.username}`;
-
-  const rowA = {
-    id: nanoIdFormat("CRID", 12),
-    club_id: clubAId,
-    opponent_id: clubBId,
-    win: scoreA,
-    lose: scoreB,
-    elo: eloA_after,
-    ranker,
-    created_at: matchDate,
-  };
-  const rowB = {
-    id: nanoIdFormat("CRID", 12),
-    club_id: clubBId,
-    opponent_id: clubAId,
-    win: scoreB,
-    lose: scoreA,
-    elo: eloB_after,
-    ranker,
-    created_at: matchDate,
-  };
-
-  await upsertClubRanking(clubAId, scoreA, scoreB, eloA_after, ranker);
-  await upsertClubRanking(clubBId, scoreB, scoreA, eloB_after, ranker);
+  await upsertClubRanking(clubAId, scoreA, scoreB, eloA_after);
+  await upsertClubRanking(clubBId, scoreB, scoreA, eloB_after);
 
   myLogs(
     `✅ Saved match: ${clubAName} ${scoreA} - ${scoreB} ${clubBName} -> ELO ${eloA_after}/${eloB_after}`
   );
-
-  // build result embed
-  const resultText =
-    resultSymbol === "DRAW"
-      ? `🤝 ${clubAName} drew with ${clubBName} (${scoreA}-${scoreB})`
-      : resultSymbol === "A"
-      ? `🎯 ${clubAName} defeated ${clubBName} (${scoreA}-${scoreB})`
-      : `🎯 ${clubBName} defeated ${clubAName} (${scoreB}-${scoreA})`;
-
-  const embed = new EmbedBuilder()
-    .setColor("#FFD700")
-    .setTitle("🏆 Club Match Recorded")
-    .setDescription(
-      `${resultText}\n\n📈 Ratings:\n- ${clubAName}: **${eloA_before} → ${eloA_after}**\n- ${clubBName}: **${eloB_before} → ${eloB_after}**`
-    )
-    .setFooter({ text: `Recorded by ${ranker}` })
-    .setTimestamp();
 
   // public announce in the club rank channel
   const announceChannelId = process.env.CLUB_RANK_CHANNEL_ID;
@@ -403,7 +361,6 @@ export const handleClubResultModal = async (interaction) => {
   if (announceChannel) {
     await announceChannel.send({
       content: "**New match recorded!**",
-      ...embed,
     });
   }
 

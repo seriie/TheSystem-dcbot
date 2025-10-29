@@ -23,7 +23,6 @@ export async function upsertClubRanking(clubId, win, lose, elo, ranker) {
         win: existing.win + win,
         lose: existing.lose + lose,
         elo,
-        ranker,
         created_at: matchDate,
       })
       .eq("club_id", clubId);
@@ -41,7 +40,6 @@ export async function upsertClubRanking(clubId, win, lose, elo, ranker) {
         win,
         lose,
         elo,
-        ranker,
         created_at: matchDate,
       },
     ]);

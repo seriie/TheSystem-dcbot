@@ -35,6 +35,7 @@ import {
   handleSummaryModal,
   handleSummarySelection,
 } from "./commands/addSummary.js";
+import { delSummary } from "./commands/deleteSummary.js";
 import { showAllSummaries } from "./commands/showAllSummeries.js";
 
 import {
@@ -221,76 +222,7 @@ client.on("messageCreate", async (msg) => {
           }
           break;
         case "delsummary":
-          try {
-            const allowedRoleId = process.env.OFFICIAL_RANKER_ROLE_ID;
-
-            if (!msg.member.roles.cache.has(allowedRoleId)) {
-              await msg.reply("🚫 You are not allowed.");
-              return;
-            }
-
-            const { error } = await supabase
-              .from("match_summary")
-              .delete()
-              .eq("id", args);
-
-            if (error) throw error;
-
-            myLogs(`✅ Summary ${args} deleted from database`);
-            await msg.reply(`✅ Summary ${args} deleted!`);
-
-            const summaryChannel = await msg.client.channels.fetch(
-              process.env.MATCH_SUMMARY_LOG_CHANNEL_ID
-            );
-
-            let deleted = 0;
-            let messages;
-            do {
-              messages = await summaryChannel.messages.fetch({ limit: 100 });
-              const recent = messages.filter(
-                (m) =>
-                  Date.now() - m.createdTimestamp < 14 * 24 * 60 * 60 * 1000
-              );
-              if (recent.size > 0) {
-                await summaryChannel.bulkDelete(recent);
-                deleted += recent.size;
-              }
-            } while (messages.size >= 2);
-
-            myLogs(`🧹 Deleted ${deleted} old summary messages`);
-
-            const { data: summaries, error: fetchError } = await supabase
-              .from("match_summary")
-              .select("*")
-              .order("created_at", { ascending: false });
-
-            if (fetchError) throw fetchError;
-
-            if (!summaries || summaries.length === 0) {
-              await summaryChannel.send("📭 No match summaries yet.");
-            } else {
-              for (const s of summaries) {
-                await summaryChannel.send(
-                  `**Match #${s.match_number}**
-                    ${s.team_a} Vs ${s.team_b}
-                    Game Type: ${s.game_type}
-                                    
-                    Game Format: ${s.format}
-                    ${s.summary_text}
-                                    
-                    Summary: ${s.result}
-                    Recorded by: ${s.recorded_by}
-                    Summary ID: ${s.id}`
-                );
-              }
-            }
-
-            myLogs(`✅ Summary channel refreshed`);
-          } catch (e) {
-            console.error("❌ Error:", e);
-            myLogs("❌ Failed to delete summary: " + e);
-            msg.reply("❌ Failed to delete summary");
-          }
+          delSummary(msg, args)
           break;
         case "showrank":
           // if(msg.author.id == "1392481215205871618") {
@@ -318,44 +250,53 @@ client.on("messageCreate", async (msg) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  const allowedRoleId = [
-    process.env.OFFICIAL_RANKER_ROLE_ID,
-    process.env.LEAD_RANKER_ROLE_ID
-  ]
-  const member = interaction.member;
+  try {
+    const allowedRoleId = [
+      process.env.OFFICIAL_RANKER_ROLE_ID,
+      process.env.LEAD_RANKER_ROLE_ID,
+    ];
 
-  const hasAccess = member?.roles?.cache?.some(role => allowedRoleId.includes(role));
+    const member = interaction.member;
+    const hasAccess = member?.roles?.cache?.some((role) =>
+      allowedRoleId.includes(role.id)
+    );
 
-  await handleRegisterButton(interaction);
-  await handleRegisterModal(interaction);
+    await handleRegisterButton(interaction);
+    await handleRegisterModal(interaction);
 
-  if (hasAccess) {
-    await handleClubRankButton(interaction);
-    await handleClubSelection(interaction);
-    await handleClubResultModal(interaction);
-    await handleRegisterClubs(interaction);
-    await handleRegisterClubModal(interaction);
-  }
-
-  if (hasAccess) {
-    await handleRankButton(interaction);
-    await handleSelectPlayer(interaction);
-    await handleModalSubmit(interaction);
-  }
-
-  if (hasAccess) {
-    await handleSummaryButton(interaction);
-    await handleSummaryModal(interaction);
-    await handleSummarySelection(interaction);
-    await showAllSummaries(interaction);
-  } else if (
-    interaction.customId?.startsWith("rank") ||
-    interaction.customId?.startsWith("summary")
-  ) {
-    await interaction.reply({
-      content: "🚫 You dont have perms to do this.",
-      ephemeral: true,
-    });
+    if (hasAccess) {
+      await handleClubRankButton(interaction);
+      await handleClubSelection(interaction);
+      await handleClubResultModal(interaction);
+      await handleRegisterClubs(interaction);
+      await handleRegisterClubModal(interaction);
+      await handleRankButton(interaction);
+      await handleSelectPlayer(interaction);
+      await handleModalSubmit(interaction);
+      await handleSummaryButton(interaction);
+      await handleSummaryModal(interaction);
+      await handleSummarySelection(interaction);
+      await showAllSummaries(interaction);
+    } else if (
+      interaction.customId?.startsWith("rank") ||
+      interaction.customId?.startsWith("summary")
+    ) {
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({
+          content: "🚫 You don't have permission to do this.",
+          ephemeral: true,
+        });
+      }
+      myLogs(`${interaction.user.username} doesn't have perms.`);
+    }
+  } catch (err) {
+    myLogs("❌  Interaction handler error:" + JSON.stringify(err, null, 2));
+    if (!interaction.replied && !interaction.deferred) {
+      await interaction.reply({
+        content: "⚠️ Internal error.",
+        ephemeral: true,
+      });
+    }
   }
 });
 
