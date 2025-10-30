@@ -58,19 +58,40 @@ export async function handleRegisterClubModal(interaction) {
   const clubId = interaction.fields.getTextInputValue("club_id_input");
   const serverName = interaction.fields.getTextInputValue("server_name_input");
   const ownerId = interaction.fields.getTextInputValue("owner_id_input");
+  const clubIdFormat = nanoIdFormat("CID", 12);
+  const clubRankingIdFormat = nanoIdFormat("CRID", 12);
 
   // Insert to DB
   const { error } = await supabase.from("clubs").insert([
     {
-      id: nanoIdFormat("CID", 12),
+      id: clubIdFormat,
       club_id: clubId,
       club_name: serverName,
       owner_id: ownerId,
     },
   ]);
 
+  const { err } = await supabase.from("club_rankings").insert([
+    {
+      id: clubRankingIdFormat,
+      club_id: clubIdFormat,
+    },
+  ]);
+
+  if (err) {
+    await interaction.reply({ 
+      content: "⚠️ Failed to update ranking data.",
+      ephemeral: true
+    });
+    myLogs("❌ Insert rank failed: " + JSON.stringify(err));
+    return;
+  }
+
   if (error) {
-    await interaction.reply({ content: "⚠️ Failed to store data.", ephemeral: true });
+    await interaction.reply({
+      content: "⚠️ Failed to store data.",
+      ephemeral: true,
+    });
     myLogs("❌ Insert failed: " + JSON.stringify(error));
     return;
   }
