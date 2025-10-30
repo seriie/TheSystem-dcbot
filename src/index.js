@@ -15,6 +15,7 @@ import { rankingConceptEmbed } from "./messages/rankingConcept.js";
 
 //  Rankings
 import { addRankEmbed } from "./messages/addRank.js";
+import { resetPlayersRank } from "./commands/resetPlayersRank.js";
 
 //  Clubs rankings
 import {
@@ -86,7 +87,7 @@ client.once("clientReady", async () => {
   //     }
   //   }
 
-  // Add rank
+  // Player rank
   await addRankEmbed(client);
 
   // Clubs rank
@@ -149,51 +150,7 @@ client.on("messageCreate", async (msg) => {
           }
           break;
         case "resetrank":
-          try {
-            const allowedRoleId = process.env.OFFICIAL_RANKER_ROLE_ID;
-
-            if (!msg.member.roles.cache.has(allowedRoleId)) {
-              await msg.reply("🚫 You are not allowed.");
-              return;
-            }
-
-            // Update rank_verified = false
-            const { error: updateError } = await supabase
-              .from("users")
-              .update({ rank_verified: false })
-              .eq("rank_verified", true);
-
-            if (updateError) {
-              myLogs(
-                "❌ Failed to update rank_verified: " +
-                  JSON.stringify(updateError)
-              );
-              await msg.reply("⚠️ Failed to update rank_verified field.");
-              return;
-            }
-
-            const { error: deleteError } = await supabase
-              .from("rankings")
-              .delete()
-              .neq("id", 0);
-
-            if (deleteError) {
-              myLogs(
-                "❌ Failed to reset player rankings: " +
-                  JSON.stringify(deleteError)
-              );
-              await msg.reply("⚠️ Failed to delete rank data.");
-              return;
-            }
-
-            myLogs("✅ All rank players have been deleted.");
-            await msg.reply(
-              "✅ All player rank data deleted, and rank_verified reset!"
-            );
-          } catch (e) {
-            myLogs("💥 Unexpected error while trying to reset: " + e.message);
-            await msg.reply("💥 Error while trying to delete data.");
-          }
+          await resetPlayersRank(msg, args);
           break;
         case "bulkdelete":
           if (!msg.member.permissions.has("ManageMessages")) {
