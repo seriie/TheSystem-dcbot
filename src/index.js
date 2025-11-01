@@ -38,7 +38,7 @@ import {
   handleRankButton,
   handleSelectPlayer,
   handleModalSubmit,
-} from "./messages/addrank.js";
+} from "./messages/addRank.js";
 
 // Commands
 import { showRankEmbed } from "./commands/showRank.js";
