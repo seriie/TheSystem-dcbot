@@ -2,8 +2,6 @@ import express from "express";
 import { supabase } from "./config/supabase.js";
 import { myLogs } from "./utils/myLogs.js";
 import { Client, GatewayIntentBits, EmbedBuilder, Partials } from "discord.js";
-import { showRankEmbed } from "./commands/showRank.js";
-import { showUsers } from "./commands/showUsers.js";
 import {
   sendRegisterMessage,
   handleRegisterButton,
@@ -14,8 +12,7 @@ import {
 import { rankingConceptEmbed } from "./messages/rankingConcept.js";
 
 //  Rankings
-import { addRankEmbed } from "./messages/addRank.js";
-import { resetPlayersRank } from "./commands/resetPlayersRank.js";
+import { addRankEmbed } from "./messages/addRankMsgEmbed.js";
 
 //  Clubs rankings
 import {
@@ -23,11 +20,10 @@ import {
   handleClubSelection,
   handleClubResultModal,
   addClubsRankEmbed,
-} from "./commands/addClubsRank.js";
-import { handleRegisterClubs } from "./commands/registerClubs.js";
-import { handleRegisterClubModal } from "./commands/registerClubs.js";
+} from "./messages/addClubsRank.js";
+import { handleRegisterClubs } from "./messages/registerClubs.js";
+import { handleRegisterClubModal } from "./messages/registerClubs.js";
 
-import { showClubRankEmbed } from "./commands/showClubRank.js";
 
 //  Match summary
 import {
@@ -35,26 +31,23 @@ import {
   handleSummaryButton,
   handleSummaryModal,
   handleSummarySelection,
-} from "./commands/addSummary.js";
-import { delSummary } from "./commands/deleteSummary.js";
-import { showAllSummaries } from "./commands/showAllSummeries.js";
+} from "./messages/addSummary.js";
+import { showAllSummaries } from "./messages/showAllSummeries.js";
 
 import {
   handleRankButton,
   handleSelectPlayer,
   handleModalSubmit,
-} from "./commands/addrank.js";
+} from "./messages/addrank.js";
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-import dotenv from "dotenv";
-
-dotenv.config();
-
-app.get("/", (req, res) => {
-  res.send("Bot API is running! 💫");
-});
+// Commands
+import { showRankEmbed } from "./commands/showRank.js";
+import { showUsers } from "./commands/showUsers.js";
+import { resetPlayersRank } from "./commands/resetPlayersRank.js";
+import { delSummary } from "./commands/deleteSummary.js";
+import { showClubRankEmbed } from "./commands/showClubRank.js";
+import { sendMsg } from "./commands/sendMsg.js";
+import { delClub } from "./commands/delClub.js";
 
 const client = new Client({
   intents: [
@@ -118,75 +111,19 @@ client.on("messageCreate", async (msg) => {
         case "users":
           await showUsers(msg, args);
           break;
-        case "verify":
-          msg.reply("Verification process started.");
-          break;
         case "sendmsg":
-          const allowedRoleId = process.env.DEVELOPER_ROLE_ID;
-
-          if (!msg.member.roles.cache.has(allowedRoleId)) {
-            await msg.reply("🚫 You are not allowed.");
-            return;
-          }
-
-          myLogs(`${msg.author.displayName} trying to send dms`);
-          const [id, ...messageParts] = args.split(" ");
-          const text = messageParts.join(" ");
-
-          if (!id || !text) {
-            return msg.reply(
-              "❌ Invalid format! Use: `$sendmsg {id} {message}`"
-            );
-          }
-
-          try {
-            const user = await client.users.fetch(id);
-            await user.send(text);
-            msg.reply(`✅ Message sent to **${user.displayName}**`);
-            myLogs(`✅  Message sent to **${user.displayName}**`);
-          } catch (err) {
-            myLogs(err);
-            msg.reply("⚠️ Failed to send DM! recheck the ID!");
-          }
+          await sendMsg(msg, args);
           break;
         case "resetrank":
           await resetPlayersRank(msg, args);
           break;
-        case "bulkdelete":
-          if (!msg.member.permissions.has("ManageMessages")) {
-            return msg.reply(
-              "❌ U don't have permissions to use this command!"
-            );
-          }
-
-          try {
-            const fetched = await channel.messages.fetch({ limit: 100 });
-            await channel.bulkDelete(fetched);
-
-            let deleted;
-            do {
-              deleted = await channel.bulkDelete(100, true);
-            } while (deleted.size > 0);
-
-            const confirmMsg = await channel.send(`✅ All message deleted!`);
-
-            setTimeout(() => {
-              confirmMsg.delete().catch(() => {});
-            }, 3000);
-          } catch (err) {
-            myLogs("❌  ", err);
-            msg.reply("❌ Failed to delete message (might be too old 14 day).");
-          }
+        case "delclub" :
+          await delClub(msg, args);
           break;
         case "delsummary":
           delSummary(msg, args)
           break;
         case "showrank":
-          // if(msg.author.id == "1392481215205871618") {
-          //   return msg.reply("STFU MIZU NOOOBBB")
-          // } else if(msg.author.id == "878215711779090443") {
-          //   msg.reply("YESS MY GOAT HEARTLY :heart:")
-          // }
           const limit = parseInt(args[0]) || 20;
           const result = await showRankEmbed(limit);
           await channel.send(result);
@@ -227,9 +164,11 @@ client.on("interactionCreate", async (interaction) => {
       await handleClubResultModal(interaction);
       await handleRegisterClubs(interaction);
       await handleRegisterClubModal(interaction);
+
       await handleRankButton(interaction);
       await handleSelectPlayer(interaction);
       await handleModalSubmit(interaction);
+
       await handleSummaryButton(interaction);
       await handleSummaryModal(interaction);
       await handleSummarySelection(interaction);
@@ -258,5 +197,3 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(process.env.TOKEN);
-
-export default app;

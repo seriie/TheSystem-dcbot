@@ -13,14 +13,13 @@ export async function handleRegisterClubs(interaction) {
   if (interaction.customId !== "open_register_club_rank_ui") return;
 
   try {
-    // bikin modal UI
     const modal = new ModalBuilder()
       .setCustomId("register_club_modal")
       .setTitle("🏆 Register Club");
 
     const clubIdInput = new TextInputBuilder()
       .setCustomId("club_id_input")
-      .setLabel("Club ID (copy ur server ID)")
+      .setLabel("Club ID (copy your server ID)")
       .setStyle(TextInputStyle.Short)
       .setPlaceholder("Put your server ID here")
       .setRequired(true);
@@ -34,7 +33,7 @@ export async function handleRegisterClubs(interaction) {
 
     const ownerIdInput = new TextInputBuilder()
       .setCustomId("owner_id_input")
-      .setLabel("Owner ID (copy owner club/sv ID))")
+      .setLabel("Owner ID (copy owner club/sv ID)")
       .setStyle(TextInputStyle.Short)
       .setPlaceholder("Input owner club/server ID here")
       .setRequired(true);
@@ -58,11 +57,32 @@ export async function handleRegisterClubModal(interaction) {
   const clubId = interaction.fields.getTextInputValue("club_id_input");
   const serverName = interaction.fields.getTextInputValue("server_name_input");
   const ownerId = interaction.fields.getTextInputValue("owner_id_input");
+
+  const { data: existingClub, error: checkError } = await supabase
+    .from("clubs")
+    .select("*")
+    .eq("club_id", clubId)
+    .single();
+
+  if (checkError && checkError.code !== "PGRST116") {
+    myLogs("❌ Failed checking existing club: " + JSON.stringify(checkError));
+    return interaction.reply({
+      content: "⚠️ Error checking existing data.",
+      ephemeral: true,
+    });
+  }
+
+  if (existingClub) {
+    return interaction.reply({
+      content: `🚫 Club **${existingClub.club_name}** already registered!`,
+      ephemeral: true,
+    });
+  }
+
   const clubIdFormat = nanoIdFormat("CID", 12);
   const clubRankingIdFormat = nanoIdFormat("CRID", 12);
 
-  // Insert to DB
-  const { error } = await supabase.from("clubs").insert([
+  const { error: insertClubErr } = await supabase.from("clubs").insert([
     {
       id: clubIdFormat,
       club_id: clubId,
@@ -71,33 +91,34 @@ export async function handleRegisterClubModal(interaction) {
     },
   ]);
 
-  const { err } = await supabase.from("club_rankings").insert([
+  if (insertClubErr) {
+    myLogs("❌ Insert club failed: " + JSON.stringify(insertClubErr));
+    return interaction.reply({
+      content: "⚠️ Failed to store club data.",
+      ephemeral: true,
+    });
+  }
+
+  const { error: insertRankErr } = await supabase.from("club_rankings").insert([
     {
       id: clubRankingIdFormat,
       club_id: clubIdFormat,
     },
   ]);
 
-  if (err) {
-    await interaction.reply({ 
+  if (insertRankErr) {
+    await supabase.from("clubs").delete().eq("id", clubIdFormat);
+    myLogs("❌ Insert ranking failed: " + JSON.stringify(insertRankErr));
+    return interaction.reply({
       content: "⚠️ Failed to update ranking data.",
-      ephemeral: true
-    });
-    myLogs("❌ Insert rank failed: " + JSON.stringify(err));
-    return;
-  }
-
-  if (error) {
-    await interaction.reply({
-      content: "⚠️ Failed to store data.",
       ephemeral: true,
     });
-    myLogs("❌ Insert failed: " + JSON.stringify(error));
-    return;
   }
 
   await interaction.reply({
-    content: "✅ Club successfully registered!",
+    content: `✅ Club **${serverName}** successfully registered!`,
     ephemeral: true,
   });
+
+  myLogs(`✅ Registered club: ${serverName} by ${interaction.user.username}`);
 }

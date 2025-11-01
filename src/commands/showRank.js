@@ -4,6 +4,12 @@ import { supabase } from "../config/supabase.js";
 import { myLogs } from "../utils/myLogs.js";
 
 export async function showRankEmbed(limit = 20) {
+  // if(msg.author.id == "1392481215205871618") {
+  //   return msg.reply("STFU MIZU NOOOBBB")
+  // } else if(msg.author.id == "878215711779090443") {
+  //   msg.reply("YESS MY GOAT HEARTLY :heart:")
+  // }
+
   const { count: totalRanked, error: countError } = await supabase
     .from("rankings")
     .select("*", { count: "exact", head: true });
