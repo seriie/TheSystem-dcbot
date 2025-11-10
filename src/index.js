@@ -9,7 +9,7 @@ import {
 } from "./messages/register.js";
 
 //  Ranking concept
-import { rankingConceptEmbed } from "./messages/rankingConcept.js";
+// import { rankingConceptEmbed } from "./messages/rankingConcept.js";
 
 //  Rankings
 import { addRankEmbed } from "./messages/addRankMsgEmbed.js";
@@ -32,8 +32,10 @@ import {
   handleSummaryModal,
   handleSummarySelection,
 } from "./messages/addSummary.js";
+
 import { showAllSummaries } from "./messages/showAllSummeries.js";
 
+// Player rank
 import {
   handleRankButton,
   handleSelectPlayer,
@@ -90,7 +92,7 @@ client.once("clientReady", async () => {
   await sendRegisterMessage(client);
 
   // Rank concept
-  await rankingConceptEmbed(client);
+  // await rankingConceptEmbed(client);
 
   // Match summary
   await addSummaryEmbed(client);
