@@ -49,7 +49,10 @@ import { resetPlayersRank } from "./commands/resetPlayersRank.js";
 import { delSummary } from "./commands/deleteSummary.js";
 import { showClubRankEmbed } from "./commands/showClubRank.js";
 import { sendMsg } from "./commands/sendMsg.js";
+import { showClubs } from "./commands/showClubs.js";
+import { clubInfo } from "./commands/clubInfo.js";
 import { delClub } from "./commands/delClub.js";
+import { editClubName } from "./commands/editClubName.js";
 
 const client = new Client({
   intents: [
@@ -119,7 +122,16 @@ client.on("messageCreate", async (msg) => {
         case "resetrank":
           await resetPlayersRank(msg, args);
           break;
-        case "delclub" :
+        case "clubs":
+          showClubs(msg);
+          break;
+        case "clubinfo":
+          clubInfo(msg, args, client);
+          break;
+        case "editclubname":
+          editClubName(msg, args);
+          break
+        case "delclub":
           await delClub(msg, args);
           break;
         case "delsummary":
@@ -161,16 +173,19 @@ client.on("interactionCreate", async (interaction) => {
     await handleRegisterModal(interaction);
 
     if (hasAccess) {
+      // Club
       await handleClubRankButton(interaction);
       await handleClubSelection(interaction);
       await handleClubResultModal(interaction);
       await handleRegisterClubs(interaction);
       await handleRegisterClubModal(interaction);
 
+      // Player
       await handleRankButton(interaction);
       await handleSelectPlayer(interaction);
       await handleModalSubmit(interaction);
 
+      // Summary
       await handleSummaryButton(interaction);
       await handleSummaryModal(interaction);
       await handleSummarySelection(interaction);
