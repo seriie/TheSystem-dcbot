@@ -2,16 +2,16 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  EmbedBuilder,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
 import { nanoIdFormat } from "../utils/nanoid.js";
 import { supabase } from "../config/supabase.js";
-
 import dotenv from "dotenv";
 import { myLogs } from "../utils/myLogs.js";
+import { embedBuilder } from "../helpers/embedBuilder.js";
+
 dotenv.config();
 
 // === SEND REGISTER MESSAGE ===
@@ -20,34 +20,31 @@ export const sendRegisterMessage = async (client) => {
   const channel = await client.channels.fetch(channelId);
 
   if (!channel) {
-    myLogs("❌  Register channel not found!")
+    myLogs("❌  Register channel not found!");
     return;
   }
 
   try {
-    myLogs("🧹  Purging ALL messages in register channel...")
+    myLogs("🧹  Purging ALL messages in register channel...");
     let deleted;
     do {
       const fetched = await channel.messages.fetch({ limit: 100 });
       if (fetched.size === 0) break;
       deleted = await channel.bulkDelete(fetched, true);
-      myLogs(`🗑️  Deleted ${deleted.size} messages...`)
+      myLogs(`🗑️  Deleted ${deleted.size} messages...`);
       await new Promise((r) => setTimeout(r, 1500));
     } while (deleted.size > 0);
   } catch (err) {
-    myLogs("⚠️  Failed to delete messages:", err)
+    myLogs("⚠️  Failed to delete messages:", err);
   }
 
-  const embed = new EmbedBuilder()
-    .setColor("#ff0000")
-    .setTitle("🧠 Member Registration")
-    .setDescription(
-      "Welcome to the server! Click the button below to register as a player.\n\n" +
-        "Once registered, you’ll be added to the ranking list and gain access to ranking features!"
-    )
-    .setImage("attachment://register-bg.png")
-    .setFooter({ text: "Press the button only once!" })
-    .setTimestamp();
+  // 🔥 Embed via helper
+  const embedData = embedBuilder(
+    "#ff0000",
+    "🧠 Member Registration",
+    "Welcome to the server! Click the button below to register as a player.\n\nOnce registered, you’ll be added to the ranking list and gain access to ranking features!",
+    "Press the button only once!"
+  );
 
   const button = new ButtonBuilder()
     .setCustomId("register_user")
@@ -58,23 +55,17 @@ export const sendRegisterMessage = async (client) => {
 
   await channel.send({
     content: "**Welcome to the Registration Channel!** 🌟",
-    embeds: [embed],
+    ...embedData, // 💪 langsung spread helper result
     components: [row],
-    files: [
-    {
-      attachment: "./src/assets/register-bg.png",
-      name: "register-bg.png",
-    },
-  ],
   });
-  myLogs("✅  Register message sent successfully!")
+
+  myLogs("✅  Register message sent successfully!");
 };
 
 // === HANDLE BUTTON CLICK ===
 export const handleRegisterButton = async (interaction) => {
-  if (!interaction.isButton() || interaction.customId !== "register_user")
-    return;
-  myLogs(`📝  ${interaction.user.username} is trying to register...`)
+  if (!interaction.isButton() || interaction.customId !== "register_user") return;
+  myLogs(`📝  ${interaction.user.username} is trying to register...`);
 
   const userId = interaction.user.id;
   const username = interaction.user.username;
@@ -87,7 +78,7 @@ export const handleRegisterButton = async (interaction) => {
     .single();
 
   if (existingUser) {
-    myLogs(`❗ ${username} already registered`)
+    myLogs(`❗ ${username} already registered`);
     return interaction.reply({
       content: `❗ You are already registered, ${username}!`,
       ephemeral: true,
@@ -101,7 +92,7 @@ export const handleRegisterButton = async (interaction) => {
 
   const robloxInput = new TextInputBuilder()
     .setCustomId("roblox_username")
-    .setLabel("Enter your Roblox username(not display name)")
+    .setLabel("Enter your Roblox username (not display name)")
     .setPlaceholder("Example: CoolPlayer_123")
     .setRequired(true)
     .setStyle(TextInputStyle.Short);
@@ -114,15 +105,13 @@ export const handleRegisterButton = async (interaction) => {
 
 // === HANDLE MODAL SUBMIT ===
 export const handleRegisterModal = async (interaction) => {
-  myLogs("🔄  Handling register modal submission...")
-  if (!interaction.isModalSubmit() || interaction.customId !== "register_modal")
-    return;
+  myLogs("🔄  Handling register modal submission...");
+  if (!interaction.isModalSubmit() || interaction.customId !== "register_modal") return;
 
   const userId = interaction.user.id;
   const username = interaction.user.username;
   const account_created_at = interaction.user.createdAt;
-  const robloxUsername =
-    interaction.fields.getTextInputValue("roblox_username");
+  const robloxUsername = interaction.fields.getTextInputValue("roblox_username");
 
   const userData = {
     id: nanoIdFormat("USR", 10),

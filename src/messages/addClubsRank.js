@@ -5,7 +5,6 @@ import {
   ButtonStyle,
   StringSelectMenuBuilder,
   ModalBuilder,
-  EmbedBuilder,
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
@@ -13,8 +12,8 @@ import dotenv from "dotenv";
 import { myLogs } from "../utils/myLogs.js";
 import { handleMatch } from "../helpers/eloRankingSystem.js";
 import { supabase } from "../config/supabase.js";
-import { nanoIdFormat } from "../utils/nanoid.js";
-import { upsertClubRanking } from "../helpers/upsertClubRankings.js"
+import { upsertClubRanking } from "../helpers/upsertClubRankings.js";
+import { embedBuilder } from "../helpers/embedBuilder.js";
 
 dotenv.config();
 
@@ -47,15 +46,14 @@ export const addClubsRankEmbed = async (client) => {
     myLogs("⚠️  Failed to delete messages:", err);
   }
 
-  const embed = new EmbedBuilder()
-    .setColor("#0099ff")
-    .setTitle("⚔️ Club Ranking Panel")
-    .setDescription(
-      "Click **Add Club Ranking** to submit a match result between two clubs. The ELO system (K=32) will be used to compute ratings. Inputs are recorded to the database."
-    )
-    .setImage("attachment://club-rank-bg.png")
-    .setFooter({ text: "Club Rankings" })
-    .setTimestamp();
+  const embed = embedBuilder(
+    "#0099ff",
+    "⚔️ Club Ranking Panel",
+    "Click **Add Club Ranking** to submit a match result between two clubs. The ELO system (K=32) will be used to compute ratings. Inputs are recorded to the database.",
+    null,
+    "Club Rankings",
+    true
+  );
 
   const btnAdd = new ButtonBuilder()
     .setCustomId("open_add_club_rank_ui")
@@ -72,13 +70,7 @@ export const addClubsRankEmbed = async (client) => {
   await channel.send({
     content:
       "**Club Ranking Management** — use the button below to add match results.",
-    embeds: [embed],
-    files: [
-      {
-        attachment: "./src/assets/club-rank-bg.png",
-        name: "club-rank-bg.png",
-      },
-    ],
+    ...embed,
     components: [row],
   });
 
@@ -254,7 +246,7 @@ export const handleClubSelection = async (interaction) => {
 export const handleClubResultModal = async (interaction) => {
   if (!interaction.isModalSubmit()) return;
   if (!interaction.customId.startsWith("club_result_modal_")) return;
-  myLogs(`${interaction.user.id} trying to add club ranking`)
+  myLogs(`${interaction.user.id} trying to add club ranking`);
 
   // parse club ids from customId
   // format: club_result_modal_<clubAId>_<clubBId>

@@ -1,4 +1,6 @@
-export const sendMsg = async (msg, args) => {
+import { myLogs } from "../utils/myLogs.js";
+
+export const sendMsg = async (msg, client, args) => {
   const allowedRoleId = process.env.DEVELOPER_ROLE_ID;
 
   if (!msg.member.roles.cache.has(allowedRoleId)) {

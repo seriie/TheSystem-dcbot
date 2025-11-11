@@ -1,14 +1,15 @@
 import { EmbedBuilder } from "discord.js";
+import fs from "fs";
+import path from "path";
 
 /**
- * Helper for making discord embed with optional parameter
- * @param {string} [color="#5865F2"] - Embed color (default blue Discord)
- * @param {string} [title=""] - Embed title
- * @param {string} [description=""] - Embed description
- * @param {string} [image=null] - Path or image url
- * @param {string} [footer=""] - Footer text
- * @param {boolean} [timestamp=true] - Do you want to show timestamp
- * @returns {{ embeds: EmbedBuilder[], files?: { attachment: string, name: string }[] }}
+ * Helper for making discord embed with optional parameter and fallback image
+ * @param {string} [color="#5865F2"]
+ * @param {string} [title=""]
+ * @param {string} [description=""]
+ * @param {string|null} [image=null] - Optional. If not provided, uses default banner.
+ * @param {string} [footer=""]
+ * @param {boolean} [timestamp=true]
  */
 export const embedBuilder = (
   color = "#5865F2",
@@ -18,30 +19,30 @@ export const embedBuilder = (
   footer = "",
   timestamp = true
 ) => {
+  const defaultBanner = path.resolve("./src/assets/basic-pan-ranking-banner.png");
+
+  const useImage =
+    image && fs.existsSync(image) ? image : (fs.existsSync(defaultBanner) ? defaultBanner : null);
+
   const embed = new EmbedBuilder()
     .setColor(color)
     .setTitle(title)
     .setDescription(description);
 
-  if (image) {
-    embed.setImage(`attachment://${image.split("/").pop()}`);
+  if (useImage) {
+    embed.setImage(`attachment://${path.basename(useImage)}`);
   }
 
-  if (footer) {
-    embed.setFooter({ text: footer });
-  }
-
-  if (timestamp) {
-    embed.setTimestamp();
-  }
+  if (footer) embed.setFooter({ text: footer });
+  if (timestamp) embed.setTimestamp();
 
   const result = { embeds: [embed] };
 
-  if (image) {
+  if (useImage) {
     result.files = [
       {
-        attachment: image,
-        name: image.split("/").pop(),
+        attachment: useImage,
+        name: path.basename(useImage),
       },
     ];
   }

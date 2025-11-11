@@ -39,7 +39,7 @@ const embed = embedBuilder(
   "#ff0000",
   "🏆 Add New Rank",
   "Click the button below to add a new rank to the ranking system.\n\nMake sure to provide accurate information when prompted!",
-  "./src/assets/set-rank-bg.png",
+  null,
   "Press the button!",
   true
 );

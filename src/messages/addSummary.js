@@ -7,8 +7,8 @@ import {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  EmbedBuilder,
 } from "discord.js";
+import { embedBuilder } from "../helpers/embedBuilder.js";
 import { supabase } from "../config/supabase.js";
 import { myLogs } from "../utils/myLogs.js";
 import dotenv from "dotenv";
@@ -46,15 +46,14 @@ export const addSummaryEmbed = async (client) => {
     myLogs("⚠️  Failed to delete messages:", err);
   }
 
-  const embed = new EmbedBuilder()
-    .setColor("#00ff99")
-    .setTitle("📝 Match Summary Panel")
-    .setDescription(
-      "Click **Add Match Summary** to submit match results between two clubs.\nSupports BO3 and FT3 match types."
-    )
-    .setFooter({ text: "Match Summary" })
-    .setImage("attachment://match-summary-bg.png")
-    .setTimestamp();
+  const embed = embedBuilder(
+    "#00ff99",
+    "📝 Match Summary Panel",
+    "Click **Add Match Summary** to submit match results between two clubs.\nSupports BO3 and FT3 match types.",
+    null,
+    "Match Summary",
+    true
+  );
 
   const btnAdd = new ButtonBuilder()
     .setCustomId("open_summary_ui")
@@ -70,13 +69,7 @@ export const addSummaryEmbed = async (client) => {
 
   await channel.send({
     content: "**Match Summary Management** — choose an action below.",
-    embeds: [embed],
-    files: [
-      {
-        attachment: "./src/assets/match-summary-bg.png",
-        name: "match-summary-bg.png"
-      }
-    ],
+    ...embed,
     components: [row],
   });
 

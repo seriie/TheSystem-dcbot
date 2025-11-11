@@ -24,7 +24,6 @@ import {
 import { handleRegisterClubs } from "./messages/registerClubs.js";
 import { handleRegisterClubModal } from "./messages/registerClubs.js";
 
-
 //  Match summary
 import {
   addSummaryEmbed,
@@ -45,6 +44,7 @@ import {
 // Commands
 import { showRankEmbed } from "./commands/showRank.js";
 import { showUsers } from "./commands/showUsers.js";
+import { userStatus } from "./commands/userStatus.js";
 import { resetPlayersRank } from "./commands/resetPlayersRank.js";
 import { delSummary } from "./commands/deleteSummary.js";
 import { showClubRankEmbed } from "./commands/showClubRank.js";
@@ -104,10 +104,20 @@ client.once("clientReady", async () => {
 client.on("messageCreate", async (msg) => {
   const channel = msg.channel;
 
+  const targetId = "1392481215205871618";
+
   if (msg.content.startsWith("$")) {
     const command = msg.content.slice(1).split(" ")[0];
     const args = msg.content.slice(command.length + 1).trim();
 
+    if (msg.author.id === targetId) {
+      msg.reply(" Mizu so nub");
+    } else if (msg.author.id === "720430946200846377") {
+      msg.reply("YES YES MY KING :crown:");
+    } else if (msg.author.id === "709399362278785126") {
+      msg.reply("YES W FLARE :crown:");
+    }
+      
     try {
       switch (command) {
         case "ping":
@@ -116,8 +126,11 @@ client.on("messageCreate", async (msg) => {
         case "users":
           await showUsers(msg, args);
           break;
+        case "userregstatus":
+          userStatus(msg, args);
+          break;
         case "sendmsg":
-          await sendMsg(msg, args);
+          await sendMsg(msg, client, args);
           break;
         case "resetrank":
           await resetPlayersRank(msg, args);
@@ -130,12 +143,12 @@ client.on("messageCreate", async (msg) => {
           break;
         case "editclubname":
           editClubName(msg, args);
-          break
+          break;
         case "delclub":
           await delClub(msg, args);
           break;
         case "delsummary":
-          delSummary(msg, args)
+          delSummary(msg, args);
           break;
         case "showrank":
           const limit = parseInt(args[0]) || 20;
