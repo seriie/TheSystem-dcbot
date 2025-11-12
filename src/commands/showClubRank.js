@@ -49,7 +49,7 @@ export async function showClubRankEmbed(limit = 10) {
     "#FFD700",
     "🏆 TOP CLUB 🏆",
     text,
-    "./src/assets/club-rank-bg.png",
+    null,
     `${footerText} • Keep grinding noobs 💪`,
     true
   );
