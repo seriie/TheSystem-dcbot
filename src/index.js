@@ -104,17 +104,21 @@ client.once("clientReady", async () => {
 client.on("messageCreate", async (msg) => {
   const channel = msg.channel;
 
-  const targetId = "1392481215205871618";
+  // const targetId = "1392481215205871618";
 
   if (msg.content.startsWith("$")) {
     const command = msg.content.slice(1).split(" ")[0];
     const args = msg.content.slice(command.length + 1).trim();
 
-    if (msg.author.id === targetId) {
-      msg.reply(" Mizu so nub");
-    } else if (msg.author.id === "720430946200846377") {
+    // if (msg.author.id === targetId) {
+    //   msg.reply(" Mizu so nub");
+    // } 
+    
+    if (msg.author.id === "720430946200846377") {
       msg.reply("YES YES MY KING :crown:");
-    } else if (msg.author.id === "709399362278785126") {
+    } 
+    
+    if (msg.author.id === "709399362278785126") {
       msg.reply("YES W FLARE :crown:");
     }
       
