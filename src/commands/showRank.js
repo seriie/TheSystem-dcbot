@@ -69,7 +69,7 @@ export async function showRankEmbed(limit = 20) {
     "#FFD700",
     "🏆 TOP PLAYER 🏆",
     text,
-    "./src/assets/list-rank-bg.png",
+    null,
     `${footerText} • Keep grinding noobs 💪`,
     true
   );
