@@ -2,8 +2,9 @@ import { embedBuilder } from "../helpers/embedBuilder.js";
 import { supabase } from "../config/supabase.js";
 
 import { myLogs } from "../utils/myLogs.js";
+import { fetchUser } from "../utils/fetchUser.js";
 
-export async function showRankEmbed(limit = 20) {
+export async function showRankEmbed(client, limit = 20) {
   // if(msg.author.id == "1392481215205871618") {
   //   return msg.reply("STFU MIZU NOOOBBB")
   // } else if(msg.author.id == "878215711779090443") {
@@ -16,7 +17,7 @@ export async function showRankEmbed(limit = 20) {
 
   const { data: rankings, error } = await supabase
     .from("rankings")
-    .select("discord_username, rank")
+    .select("users(discord_id), rank")
     .order("rank", { ascending: false })
     .limit(limit);
 
@@ -52,11 +53,11 @@ export async function showRankEmbed(limit = 20) {
       text += `${i}. [ Vacant ]\n`;
     }
   } else {
-    rankings.forEach((p, i) => {
-      text += `${i + 1}. [ ${p.discord_username} ] — ${p.rank.toFixed(
-        2
-      )} ovr\n`;
-    });
+    for (const [i, p] of rankings.entries()) {
+      const user = await fetchUser(client, p.users.discord_id);
+      const username = user ? user.username : "Unknown";
+      text += `${i + 1}. [ ${username} ] — ${p.rank.toFixed(2)} ovr\n`;
+    }
 
     for (let i = rankings.length + 1; i <= limit; i++) {
       text += `${i}. [ Vacant ]\n`;

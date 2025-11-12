@@ -46,25 +46,82 @@ export const sendRegisterMessage = async (client) => {
     "Press the button only once!"
   );
 
-  const button = new ButtonBuilder()
+  const regButton = new ButtonBuilder()
     .setCustomId("register_user")
     .setLabel("Register Now 🚀")
     .setStyle(ButtonStyle.Success);
 
-  const row = new ActionRowBuilder().addComponents(button);
+  const editButton = new ButtonBuilder()
+    .setCustomId("edit_user")
+    .setLabel("Edit your data 📝")
+    .setStyle(ButtonStyle.Secondary);
+
+  const row = new ActionRowBuilder().addComponents(regButton, editButton);
 
   await channel.send({
     content: "**Welcome to the Registration Channel!** 🌟",
-    ...embedData, // 💪 langsung spread helper result
+    ...embedData,
     components: [row],
   });
 
   myLogs("✅  Register message sent successfully!");
 };
 
+export const handleEditUser = async (interaction) => {
+  if (!interaction.isButton() || interaction.customId !== "edit_user") return;
+
+  myLogs(`📝  ${interaction.user.username} is trying to edit data...`);
+
+  const modal = new ModalBuilder()
+    .setCustomId("edit_modal")
+    .setTitle("Edit your data 📝");
+
+  const robloxInput = new TextInputBuilder()
+    .setCustomId("edit_roblox_username")
+    .setLabel("Enter your Roblox username (not display name)")
+    .setPlaceholder("Example: CoolPlayer_123")
+    .setRequired(true)
+    .setStyle(TextInputStyle.Short);
+
+  const row = new ActionRowBuilder().addComponents(robloxInput);
+  modal.addComponents(row);
+
+  await interaction.showModal(modal);
+};
+
+export const handleEditModal = async (interaction) => {
+  if (!interaction.isModalSubmit() || interaction.customId !== "edit_modal")
+    return;
+
+  const robloxUsn = interaction.fields.getTextInputValue(
+    "edit_roblox_username"
+  );
+  const discord_id = interaction.user.id;
+
+  const { error } = await supabase
+    .from("users")
+    .update({ roblox_username: robloxUsn })
+    .eq("discord_id", discord_id);
+
+  if (error) {
+    myLogs(`⚠️  ${interaction.user.username} failed to edit`);
+    return interaction.reply({
+      content: "⚠️ Failed to edit. Please try again later.",
+      ephemeral: true,
+    });
+  }
+
+  myLogs(`✅  ${interaction.user.username} successfully edited to ${robloxUsn}!`);
+  await interaction.reply({
+    content: `✅ Your Roblox username has been updated to **${robloxUsn}** 🎮`,
+    ephemeral: true,
+  });
+};
+
 // === HANDLE BUTTON CLICK ===
 export const handleRegisterButton = async (interaction) => {
-  if (!interaction.isButton() || interaction.customId !== "register_user") return;
+  if (!interaction.isButton() || interaction.customId !== "register_user")
+    return;
   myLogs(`📝  ${interaction.user.username} is trying to register...`);
 
   const userId = interaction.user.id;
@@ -106,12 +163,14 @@ export const handleRegisterButton = async (interaction) => {
 // === HANDLE MODAL SUBMIT ===
 export const handleRegisterModal = async (interaction) => {
   myLogs("🔄  Handling register modal submission...");
-  if (!interaction.isModalSubmit() || interaction.customId !== "register_modal") return;
+  if (!interaction.isModalSubmit() || interaction.customId !== "register_modal")
+    return;
 
   const userId = interaction.user.id;
   const username = interaction.user.username;
   const account_created_at = interaction.user.createdAt;
-  const robloxUsername = interaction.fields.getTextInputValue("roblox_username");
+  const robloxUsername =
+    interaction.fields.getTextInputValue("roblox_username");
 
   const userData = {
     id: nanoIdFormat("USR", 10),

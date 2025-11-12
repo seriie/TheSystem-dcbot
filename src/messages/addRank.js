@@ -9,24 +9,32 @@ import { supabase } from "../config/supabase.js";
 import { getUnrankedUsers } from "../db/getUnrankedUsers.js";
 
 import { myLogs } from "../utils/myLogs.js";
+import { fetchUser } from "../utils/fetchUser.js";
 
-export const handleRankButton = async (interaction) => {
+export const handleRankButton = async (interaction, client) => {
   if (!interaction.isButton()) return;
   if (interaction.customId !== "add_rank") return;
 
+  await interaction.deferReply({ ephemeral: true }); // ⬅️ kasih waktu lebih
   const users = await getUnrankedUsers(25);
 
   if (!users.length) {
-    return interaction.reply({
+    return interaction.editReply({
       content: "✅ All players are already ranked!",
-      ephemeral: true,
     });
   }
 
-  const options = users.map((u) => ({
-    label: u.discord_username.slice(0, 100),
-    value: u.discord_username,
-  }));
+  const options = await Promise.all(
+    users.map(async (u) => {
+      const userData = await fetchUser(client, u.discord_id);
+      return {
+        label: `${u.roblox_username.slice(0, 100)} (${
+          userData?.displayName || "Unknown"
+        })`,
+        value: u.discord_id,
+      };
+    })
+  );
 
   const select = new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
@@ -35,14 +43,13 @@ export const handleRankButton = async (interaction) => {
       .addOptions(options)
   );
 
-  await interaction.reply({
+  await interaction.editReply({
     content: "Choose a player to rank:",
     components: [select],
-    ephemeral: true,
   });
 };
 
-export const handleSelectPlayer = async (interaction) => {
+export const handleSelectPlayer = async (interaction, client) => {
   if (!interaction.isStringSelectMenu()) return;
   if (interaction.customId !== "select_player_to_rank") return;
 
@@ -50,18 +57,21 @@ export const handleSelectPlayer = async (interaction) => {
   const user = interaction.user;
 
   if (player === user.username) {
-    myLogs(`⚠️  ${user.username} is trying to rank himself`)
+    myLogs(`⚠️  ${user.username} is trying to rank himself`);
     return interaction.reply({
       content: "🚫 You can’t rank yourself, silly!",
       ephemeral: true,
     });
   }
 
-  myLogs(`📑  ${user.username} selected ${player}!`)
+  const fetchedUser = await fetchUser(client, player);
+  const displayName = fetchedUser?.displayName || "Unknown";
+
+  myLogs(`📑  ${user.username} selected ${displayName}!`);
 
   const modal = new ModalBuilder()
     .setCustomId(`rank_modal_${player}`)
-    .setTitle(`🏀 Rank ${player}`);
+    .setTitle(`🏀 Rank ${displayName}`);
 
   const skills = [
     "offense",
@@ -86,7 +96,7 @@ export const handleSelectPlayer = async (interaction) => {
   await interaction.showModal(modal);
 };
 
-export const handleModalSubmit = async (interaction) => {
+export const handleModalSubmit = async (interaction, client) => {
   if (!interaction.isModalSubmit()) return;
   if (!interaction.customId.startsWith("rank_modal_")) return;
 
@@ -98,6 +108,9 @@ export const handleModalSubmit = async (interaction) => {
     "style_mastery",
     "vision",
   ];
+
+  const fetchedUser = await fetchUser(client, player);
+  const displayName = fetchedUser?.displayName || "Unknown";
 
   const data = {};
   for (const s of skills) {
@@ -112,11 +125,11 @@ export const handleModalSubmit = async (interaction) => {
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("id")
-    .eq("discord_username", player)
+    .eq("discord_id", player)
     .single();
 
   if (userError || !userData) {
-    myLogs("🔎  User not found:", userError)
+    myLogs("🔎  User not found:", userError);
     return interaction.reply({
       content: "❌ Player not found in database.",
       ephemeral: true,
@@ -129,7 +142,7 @@ export const handleModalSubmit = async (interaction) => {
   const { error } = await supabase.from("rankings").insert([
     {
       user_id,
-      discord_username: player,
+      discord_username: displayName,
       ...data,
       rank, // ⬅️ average from the score
       created_at: new Date().toISOString(),
@@ -138,27 +151,27 @@ export const handleModalSubmit = async (interaction) => {
 
   // Update for user ranked marking
   try {
-    myLogs("🔄  updating rank status...")
+    myLogs("🔄  updating rank status...");
     await supabase
       .from("users")
       .update({ rank_verified: true })
       .eq("id", user_id);
   } catch (e) {
-    myLogs("❌  Error updating user:", e)
+    myLogs("❌  Error updating user:", e);
   }
 
   if (error) {
-    myLogs("❌  ", error)
+    myLogs("❌  ", error);
     return interaction.reply({
       content: "❌ Failed to save data.",
       ephemeral: true,
     });
   }
 
-  myLogs(`📊  ${interaction.user.username} have ranked ${player}`)
+  myLogs(`📊  ${interaction.user.username} have ranked ${displayName}`);
 
   await interaction.reply({
-    content: `✅ Ranking for **${player}** saved successfully! Average rank: **${rank.toFixed(
+    content: `✅ Ranking for **${displayName}** saved successfully! Average rank: **${rank.toFixed(
       2
     )}** 🏀`,
     ephemeral: true,

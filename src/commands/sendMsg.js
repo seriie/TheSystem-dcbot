@@ -8,7 +8,7 @@ export const sendMsg = async (msg, client, args) => {
     return;
   }
 
-  myLogs(`${msg.author.displayName} trying to send dms`);
+  myLogs(`🔄  ${msg.author.displayName} trying to send dms`);
   const [id, ...messageParts] = args.split(" ");
   const text = messageParts.join(" ");
 

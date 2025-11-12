@@ -1,12 +1,15 @@
-import express from "express";
-import { supabase } from "./config/supabase.js";
 import { myLogs } from "./utils/myLogs.js";
 import { Client, GatewayIntentBits, EmbedBuilder, Partials } from "discord.js";
+
+// Player Registration
 import {
   sendRegisterMessage,
   handleRegisterButton,
   handleRegisterModal,
+  handleEditUser,
+  handleEditModal
 } from "./messages/register.js";
+
 
 //  Ranking concept
 // import { rankingConceptEmbed } from "./messages/rankingConcept.js";
@@ -156,7 +159,7 @@ client.on("messageCreate", async (msg) => {
           break;
         case "showrank":
           const limit = parseInt(args[0]) || 20;
-          const result = await showRankEmbed(limit);
+          const result = await showRankEmbed(client, limit);
           await channel.send(result);
           break;
         case "showclubrank":
@@ -188,6 +191,8 @@ client.on("interactionCreate", async (interaction) => {
 
     await handleRegisterButton(interaction);
     await handleRegisterModal(interaction);
+    await handleEditUser(interaction);
+    await handleEditModal(interaction);
 
     if (hasAccess) {
       // Club
@@ -198,9 +203,9 @@ client.on("interactionCreate", async (interaction) => {
       await handleRegisterClubModal(interaction);
 
       // Player
-      await handleRankButton(interaction);
-      await handleSelectPlayer(interaction);
-      await handleModalSubmit(interaction);
+      await handleRankButton(interaction, client);
+      await handleSelectPlayer(interaction, client);
+      await handleModalSubmit(interaction, client);
 
       // Summary
       await handleSummaryButton(interaction);
