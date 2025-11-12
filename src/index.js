@@ -42,6 +42,7 @@ import {
   handleRankButton,
   handleSelectPlayer,
   handleModalSubmit,
+  handlePagination
 } from "./messages/addRank.js";
 
 // Commands
@@ -206,6 +207,7 @@ client.on("interactionCreate", async (interaction) => {
       await handleRankButton(interaction, client);
       await handleSelectPlayer(interaction, client);
       await handleModalSubmit(interaction, client);
+      await handlePagination(interaction, client);
 
       // Summary
       await handleSummaryButton(interaction);

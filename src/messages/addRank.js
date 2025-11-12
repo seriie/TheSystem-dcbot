@@ -4,6 +4,8 @@ import {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
+  ButtonBuilder,
+  ButtonStyle
 } from "discord.js";
 import { supabase } from "../config/supabase.js";
 import { getUnrankedUsers } from "../db/getUnrankedUsers.js";
@@ -11,18 +13,25 @@ import { getUnrankedUsers } from "../db/getUnrankedUsers.js";
 import { myLogs } from "../utils/myLogs.js";
 import { fetchUser } from "../utils/fetchUser.js";
 
-export const handleRankButton = async (interaction, client) => {
+const PAGE_SIZE = 25;
+
+export const handleRankButton = async (interaction, client, page = 0) => {
   if (!interaction.isButton()) return;
   if (interaction.customId !== "add_rank") return;
 
-  await interaction.deferReply({ ephemeral: true }); // ⬅️ kasih waktu lebih
-  const users = await getUnrankedUsers(50);
+  await interaction.deferReply({ ephemeral: true });
 
-  if (!users.length) {
+  // ambil semua user
+  const allUsers = await getUnrankedUsers();
+
+  if (!allUsers.length) {
     return interaction.editReply({
       content: "✅ All players are already ranked!",
     });
   }
+
+  // potong jadi batch 25 user per page
+  const users = allUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const options = await Promise.all(
     users.map(async (u) => {
@@ -39,15 +48,87 @@ export const handleRankButton = async (interaction, client) => {
   const select = new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId("select_player_to_rank")
-      .setPlaceholder("Choose player to rank")
+      .setPlaceholder(`Page ${page + 1}`)
       .addOptions(options)
   );
 
+  // tombol prev / next
+  const prevBtn = new ButtonBuilder()
+    .setCustomId(`rank_prev_${page}`)
+    .setLabel("⬅️ Prev")
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled(page === 0);
+
+  const nextBtn = new ButtonBuilder()
+    .setCustomId(`rank_next_${page}`)
+    .setLabel("➡️ Next")
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled((page + 1) * PAGE_SIZE >= allUsers.length);
+
+  const buttons = new ActionRowBuilder().addComponents(prevBtn, nextBtn);
+
   await interaction.editReply({
     content: "Choose a player to rank:",
-    components: [select],
+    components: [select, buttons],
   });
 };
+
+export const handlePagination = async (interaction, client) => {
+  if (!interaction.isButton()) return;
+  if (!interaction.customId.startsWith("rank_")) return;
+
+  await interaction.deferUpdate(); // ✅ bikin interaction "tetap hidup"
+
+  const [_, direction, pageStr] = interaction.customId.split("_");
+  let page = parseInt(pageStr);
+
+  page = direction === "next" ? page + 1 : page - 1;
+
+  const allUsers = await getUnrankedUsers();
+  const PAGE_SIZE = 25;
+
+  const users = allUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const options = await Promise.all(
+    users.map(async (u) => {
+      const userData = await fetchUser(client, u.discord_id);
+      return {
+        label: `${u.roblox_username.slice(0, 100)} (${
+          userData?.displayName || "Unknown"
+        })`,
+        value: u.discord_id,
+      };
+    })
+  );
+
+  const select = new ActionRowBuilder().addComponents(
+    new StringSelectMenuBuilder()
+      .setCustomId("select_player_to_rank")
+      .setPlaceholder(`Page ${page + 1}`)
+      .addOptions(options)
+  );
+
+  const prevBtn = new ButtonBuilder()
+    .setCustomId(`rank_prev_${page}`)
+    .setLabel("⬅️ Prev")
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled(page === 0);
+
+  const nextBtn = new ButtonBuilder()
+    .setCustomId(`rank_next_${page}`)
+    .setLabel("➡️ Next")
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled((page + 1) * PAGE_SIZE >= allUsers.length);
+
+  const buttons = new ActionRowBuilder().addComponents(prevBtn, nextBtn);
+
+  // 🧠 karena udah deferUpdate(), sekarang pakai editReply
+  await interaction.editReply({
+    content: "Choose a player to rank:",
+    components: [select, buttons],
+  });
+};
+
+
 
 export const handleSelectPlayer = async (interaction, client) => {
   if (!interaction.isStringSelectMenu()) return;
@@ -55,6 +136,7 @@ export const handleSelectPlayer = async (interaction, client) => {
 
   const player = interaction.values[0];
   const user = interaction.user;
+  myLogs(player)
 
   if (player === user.username) {
     myLogs(`⚠️  ${user.username} is trying to rank himself`);

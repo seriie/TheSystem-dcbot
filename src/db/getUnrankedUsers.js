@@ -1,7 +1,7 @@
 // db/getUnrankedUsers.js
 import { supabase } from '../config/supabase.js';
 
-export async function getUnrankedUsers(limit = 100) {
+export async function getUnrankedUsers(limit = 25) {
   // note: select top `limit` users (select menu limit = 25)
   const { data, error } = await supabase
     .from('users')
