@@ -21,7 +21,6 @@ export const handleRankButton = async (interaction, client, page = 0) => {
 
   await interaction.deferReply({ ephemeral: true });
 
-  // ambil semua user
   const allUsers = await getUnrankedUsers();
 
   if (!allUsers.length) {
@@ -30,7 +29,6 @@ export const handleRankButton = async (interaction, client, page = 0) => {
     });
   }
 
-  // potong jadi batch 25 user per page
   const users = allUsers.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const options = await Promise.all(
@@ -52,7 +50,6 @@ export const handleRankButton = async (interaction, client, page = 0) => {
       .addOptions(options)
   );
 
-  // tombol prev / next
   const prevBtn = new ButtonBuilder()
     .setCustomId(`rank_prev_${page}`)
     .setLabel("⬅️ Prev")
@@ -121,7 +118,6 @@ export const handlePagination = async (interaction, client) => {
 
   const buttons = new ActionRowBuilder().addComponents(prevBtn, nextBtn);
 
-  // 🧠 karena udah deferUpdate(), sekarang pakai editReply
   await interaction.editReply({
     content: "Choose a player to rank:",
     components: [select, buttons],
