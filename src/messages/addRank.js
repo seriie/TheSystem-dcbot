@@ -50,6 +50,7 @@ export const handleRankButton = async (interaction, client, page = 0) => {
       .addOptions(options)
   );
 
+  // tombol prev / next
   const prevBtn = new ButtonBuilder()
     .setCustomId(`rank_prev_${page}`)
     .setLabel("⬅️ Prev")
@@ -74,7 +75,7 @@ export const handlePagination = async (interaction, client) => {
   if (!interaction.isButton()) return;
   if (!interaction.customId.startsWith("rank_")) return;
 
-  await interaction.deferUpdate(); // ✅ bikin interaction "tetap hidup"
+  await interaction.deferUpdate();
 
   const [_, direction, pageStr] = interaction.customId.split("_");
   let page = parseInt(pageStr);
