@@ -16,7 +16,7 @@ export const handleRankButton = async (interaction, client) => {
   if (interaction.customId !== "add_rank") return;
 
   await interaction.deferReply({ ephemeral: true }); // ⬅️ kasih waktu lebih
-  const users = await getUnrankedUsers(100);
+  const users = await getUnrankedUsers(50);
 
   if (!users.length) {
     return interaction.editReply({
