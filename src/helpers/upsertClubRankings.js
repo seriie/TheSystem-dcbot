@@ -2,7 +2,7 @@ import { supabase } from "../config/supabase.js";
 import { myLogs } from "../utils/myLogs.js";
 import { nanoIdFormat } from "../utils/nanoid.js";
 
-export async function upsertClubRanking(clubId, win, lose, elo, ranker) {
+export async function upsertClubRanking(clubId, win, lose, elo) {
   const matchDate = new Date().toISOString();
 
   const { data: existing, error: fetchError } = await supabase

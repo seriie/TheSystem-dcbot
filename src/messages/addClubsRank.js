@@ -164,11 +164,11 @@ export const handleClubSelection = async (interaction) => {
   userSelections.set(uid, sel);
 
   const clubs = await fetchClubs();
-  const options = clubs.slice(0, 25).map((c) => ({
-    label: c.club_name,
-    value: String(c.id),
-    default: String(c.id) === sel.clubA || String(c.id) === sel.clubB, // auto-highlight
-  }));
+  // const options = clubs.slice(0, 25).map((c) => ({
+  //   label: c.club_name,
+  //   value: String(c.id),
+  //   default: String(c.id) === sel.clubA || String(c.id) === sel.clubB, // auto-highlight
+  // }));
 
   const selectA = new StringSelectMenuBuilder()
     .setCustomId("select_club_a")
@@ -222,14 +222,14 @@ export const handleClubSelection = async (interaction) => {
     .setCustomId("scoreA")
     .setLabel("Team A score (win count)")
     .setStyle(TextInputStyle.Short)
-    .setPlaceholder("Example: 2")
+    .setPlaceholder("Example: 1")
     .setRequired(true);
 
   const scoreBInput = new TextInputBuilder()
     .setCustomId("scoreB")
     .setLabel("Team B score (win count)")
     .setStyle(TextInputStyle.Short)
-    .setPlaceholder("Example: 1")
+    .setPlaceholder("Example: 0")
     .setRequired(true);
 
   modal.addComponents(

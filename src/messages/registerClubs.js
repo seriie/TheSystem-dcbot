@@ -103,6 +103,7 @@ export async function handleRegisterClubModal(interaction) {
     {
       id: clubRankingIdFormat,
       club_id: clubIdFormat,
+      club_discord_id: clubId
     },
   ]);
 

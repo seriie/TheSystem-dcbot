@@ -7,9 +7,8 @@ import {
   handleRegisterButton,
   handleRegisterModal,
   handleEditUser,
-  handleEditModal
+  handleEditModal,
 } from "./messages/register.js";
-
 
 //  Ranking concept
 // import { rankingConceptEmbed } from "./messages/rankingConcept.js";
@@ -42,7 +41,7 @@ import {
   handleRankButton,
   handleSelectPlayer,
   handleModalSubmit,
-  handlePagination
+  handlePagination,
 } from "./messages/addRank.js";
 
 // Commands
@@ -57,6 +56,10 @@ import { showClubs } from "./commands/showClubs.js";
 import { clubInfo } from "./commands/clubInfo.js";
 import { delClub } from "./commands/delClub.js";
 import { editClubName } from "./commands/editClubName.js";
+import { resetClubRank } from "./commands/resetClubRank.js";
+import { halo } from "./commands/haloGpt.js";
+import { hf } from "./commands/hugging-face/hf.js";
+import { hfttm } from "./commands/hugging-face/hfttm.js";
 
 const client = new Client({
   intents: [
@@ -107,7 +110,6 @@ client.once("clientReady", async () => {
 
 client.on("messageCreate", async (msg) => {
   const channel = msg.channel;
-
   // const targetId = "1392481215205871618";
 
   if (msg.content.startsWith("$")) {
@@ -116,20 +118,73 @@ client.on("messageCreate", async (msg) => {
 
     // if (msg.author.id === targetId) {
     //   msg.reply(" Mizu so nub");
-    // } 
-    
-    if (msg.author.id === "720430946200846377") {
-      msg.reply("YES YES MY KING :crown:");
-    } 
-    
-    if (msg.author.id === "709399362278785126") {
-      msg.reply("YES W FLARE :crown:");
-    }
-      
+    // }
+
     try {
       switch (command) {
+        case "hf":
+          hf(msg, args);
+          break;
+        case "hfttm":
+          hfttm(msg, args);  
+          break;
+        case "hi":
+          //  Kira
+          if (msg.author.id === "720430946200846377") {
+            msg.reply("YES YES MY KING :crown:");
+          }
+
+          // me
+          else if (msg.author.id === "973507863811063828") {
+            msg.reply("MY GOAT :goat:");
+          }
+
+          // Flare
+          else if (msg.author.id === "709399362278785126") {
+            msg.reply("YES W FLARE :crown:");
+          }
+
+          // Alan
+          else if (msg.author.id === "1435535195653804034") {
+            msg.reply(`Syfm idiot ${msg.author.displayName}`);
+          }
+
+          // Notixal
+          else if (msg.author.id === "1260526011334922340") {
+            msg.reply(`Hello tuffest ${msg.author.displayName}`);
+          }
+
+          // Rshud
+          else if (msg.author.id === "1393044238140444704") {
+            msg.reply(`Hello hello pro ${msg.author.displayName}`);
+          }
+
+          // Cassie
+          else if (msg.author.id === "862553441292910633") {
+            msg.reply(`YES YES PRETTY ${msg.author.displayName} :cherry_blossom:`);
+          }
+
+          // Marn
+          else if (msg.author.id === "1406620434732023948") {
+            msg.reply(`Who r u noob ${msg.author.displayName}?`);
+          }
+
+          // Near
+          else if (msg.author.id === "826663074870198352") {
+            msg.reply(`GOATED ${msg.author.displayName}`);
+          }
+
+          else {
+            msg.reply(`Hi ${msg.author.displayName}`);
+          }
+          
+          break;
         case "ping":
           msg.reply("Pong!");
+          break;
+        case "halo":
+          // return msg.reply(`Can't use openai rn, sorry ${msg.author.displayName}`);
+          halo(msg, args);
           break;
         case "users":
           await showUsers(msg, args);
@@ -154,6 +209,9 @@ client.on("messageCreate", async (msg) => {
           break;
         case "delclub":
           await delClub(msg, args);
+          break;
+        case "resetclubrank":
+          resetClubRank(msg, args);
           break;
         case "delsummary":
           delSummary(msg, args);
